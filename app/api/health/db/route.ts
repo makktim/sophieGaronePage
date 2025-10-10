@@ -1,8 +1,10 @@
-import { prisma } from "@/app/lib/prisma";
-import { NextResponse } from "next/server";
 
+/*  import { NextResponse } from "next/server";
+import { getPrisma, hasDb } from "@/app/lib/prisma";
+
+// ha nincs DB, adj fallbacket (pl. üres tömb / mock)
 export async function GET() {
-  try {
+ try {
     // legegyszerűbb, portábilis check
     const now = await prisma.$queryRaw<{ now: Date }[]>`SELECT NOW() as now`;
     return NextResponse.json({ ok: true, now: now?.[0]?.now ?? null });
@@ -11,6 +13,14 @@ export async function GET() {
     return NextResponse.json(
       { ok: false, error: errorMessage },
       { status: 500 }
-    );
+    ) 
   }
+}*/;
+
+export async function GET() {
+  return new Response(JSON.stringify({ message: "Hello from app API!" }), {
+    status: 200,
+    headers: { "Content-Type": "application/json" },
+  });
 }
+

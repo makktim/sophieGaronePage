@@ -1,4 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+// (opcionális) ha szeretnél pontosabb típust a draft-hoz:
+// import type { Draft } from "@reduxjs/toolkit";
 
 export type ShippingMethod =
   | "gls_courier"
@@ -78,17 +80,29 @@ const initialState: ShippingState = {
   showPicker: false,
 };
 
+// ── Típusos setField reducer (generikus) ──────────────────────────────────────
+type SetFieldPayload<K extends keyof ShippingState> = {
+  key: K;
+  value: ShippingState[K];
+};
+
+const setFieldReducer = <K extends keyof ShippingState>(
+  state: ShippingState, // vagy Draft<ShippingState> ha használod a típust
+  action: PayloadAction<SetFieldPayload<K>>
+) => {
+  const { key, value } = action.payload;
+  // TS itt tudja, hogy value: ShippingState[K]
+  state[key] = value as ShippingState[typeof key];
+};
+
+// ── Slice ─────────────────────────────────────────────────────────────────────
 const shippingSlice = createSlice({
   name: "shipping",
   initialState,
   reducers: {
-    setField(
-      state,
-      action: PayloadAction<{ key: keyof ShippingState; value: any }>
-    ) {
-      const { key, value } = action.payload;
-      state[key] = value;
-    },
+    // Dinamikus mezőállítás típusosan
+    setField: setFieldReducer,
+
     setShippingMethod(state, action: PayloadAction<ShippingMethod>) {
       state.shipping = action.payload;
       const requiresPickup =
@@ -96,18 +110,23 @@ const shippingSlice = createSlice({
         action.payload === "foxpost_locker";
       if (!requiresPickup) state.pickupPoint = null;
     },
+
     setPickupPoint(state, action: PayloadAction<PickupPoint | null>) {
       state.pickupPoint = action.payload;
     },
+
     togglePicker(state, action: PayloadAction<boolean>) {
       state.showPicker = action.payload;
     },
+
     setSubmitting(state, action: PayloadAction<boolean>) {
       state.submitting = action.payload;
     },
+
     setError(state, action: PayloadAction<string | null>) {
       state.error = action.payload;
     },
+
     resetCheckout() {
       return initialState;
     },

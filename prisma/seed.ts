@@ -1,4 +1,4 @@
-import { prisma } from "@/app/lib/prisma";
+/* import { prisma } from "@/app/lib/prisma";
 
 async function main() {
   const count = await prisma.product.count();
@@ -20,3 +20,4 @@ main()
     await prisma.$disconnect();
     process.exit(1);
   });
+ */

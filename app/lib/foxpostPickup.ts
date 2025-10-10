@@ -21,9 +21,9 @@ export async function resolveFoxpostPickup(
   if (!r.ok) return null;
 
   const data = await r.json();
-  const rows: any[] = Array.isArray(data) ? data : data?.items || [];
+  const rows = Array.isArray(data) ? data : data?.items || [];
   const hit = rows.find(
-    (x) => String(x.operator_id) === id || String(x.place_id) === id
+    (x: { operator_id: string; place_id: string; }) => String(x.operator_id) === id || String(x.place_id) === id
   );
   if (!hit) return null;
 

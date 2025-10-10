@@ -13,7 +13,7 @@ import { caveat } from "../../utils/fonts";
 export default function BgIntro() {
   const intro = useSelector((state: RootState) => state.content.content.intro);
   const isOpen = useSelector((state: RootState) => state.content.isOpen);
-  const product = useSelector((state: RootState) => state.products.items);
+// const product = useSelector((state: RootState) => state.products.items);
 
   return (
     <section id="intro" className={styles.intro}>

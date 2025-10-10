@@ -1,4 +1,4 @@
-// app/api/create-checkout-session/route.ts
+/* // app/api/create-checkout-session/route.ts
 export const runtime = "nodejs";
 import type { Product } from "@prisma/client";
 
@@ -6,9 +6,10 @@ import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import { prisma } from "@/app/lib/prisma";
 import { foxpostFetch } from "@/app/lib/foxpostClient";
-import { sendOrderEmails } from "@/app/lib/email/send";
-import { OrderEmailInput } from "@/app/lib/email/templates/orderCustomer";
+import type { OrderEmailInput } from "@/app/lib/email/templates/orderCustomer";
 import { resolveFoxpostPickup } from "@/app/lib/foxpostPickup";
+
+const { sendOrderEmails } = await import("@/app/lib/email/send");
 
 // ===== Types =====
 
@@ -62,6 +63,31 @@ type FoxpostParcelResponseItem = {
   barcodeTof?: string; // házhoz esetén
   sendType?: "APM" | "HD" | "COLLECT";
   errors?: unknown;
+};
+
+// Minimál order shape, ami ebben a fájlban kell
+type OrderItemRow = {
+  productId: string;
+  qty: number;
+  priceHUF: number;
+};
+type OrderRow = {
+  id: string;
+  orderNo: string;
+  userEmail: string;
+  status: string;
+  totalHUF: number;
+  subtotalHUF: number;
+  shippingHUF: number;
+  discountHUF: number;
+  paymentMethod: string;
+  shippingMethod: string;
+  pickupPointId: string;
+  shippingParcelId: string;
+  billing: Address;
+  shipping: Address;
+  note: string | null;
+  items: OrderItemRow[];
 };
 
 // ===== Stripe init =====
@@ -206,7 +232,6 @@ async function createFoxpostParcelCOD(params: {
   const raw = await res.text();
 
   if (res.status !== 201) {
-    // 200 esetén is lehet hiba (valid=false + errors) – ezt is lássuk logban
     console.error("Foxpost /parcel error:", res.status, raw);
     return null;
   }
@@ -269,7 +294,8 @@ export async function POST(req: Request) {
 
     // 2) Összegek (HUF, egész)
     const computedSubtotal = cartItems.reduce((sum, it) => {
-      const p = byId.get(String(it.id))!;
+      const p = byId.get(String(it.id));
+      if (!p) return sum;
       return sum + Number(p.priceHUF) * Math.max(1, Number(it.quantity || 1));
     }, 0);
 
@@ -306,7 +332,7 @@ export async function POST(req: Request) {
     const cancelUrl = `${base}/cart`;
 
     // 6) Order mentése PENDING-ként (minden kötelező mező)
-    const order = await prisma.order.create({
+    const order = (await prisma.order.create({
       data: {
         userEmail,
         status: "PENDING",
@@ -318,7 +344,7 @@ export async function POST(req: Request) {
         paymentMethod,
         shippingMethod,
         pickupPointId,
-        shippingParcelId: "", // később kerül be a Foxpost azonosító
+        shippingParcelId: "",
         billing,
         shipping: shippingAddr,
         note: String(body.note ?? ""),
@@ -334,7 +360,7 @@ export async function POST(req: Request) {
         },
       },
       include: { items: true },
-    });
+    })) as unknown as OrderRow;
 
     // 7) COD (utánvét) ág — NINCS Stripe, Foxpost csomag azonnal
     if (paymentMethod === "cod") {
@@ -356,7 +382,6 @@ export async function POST(req: Request) {
             data: { shippingParcelId: parcelId },
           });
         } else {
-          // nem törjük el a folyamatot – a rendelés létrejött
           console.error(
             "Foxpost COD create returned null (parcel not created)."
           );
@@ -374,7 +399,8 @@ export async function POST(req: Request) {
           );
         }
       } catch (codErr) {
-        console.error("COD flow error:", (codErr as Error).message);
+        const m = codErr instanceof Error ? codErr.message : String(codErr);
+        console.error("COD flow error:", m);
       }
 
       const pickupPointInfo =
@@ -382,20 +408,21 @@ export async function POST(req: Request) {
           ? await resolveFoxpostPickup(pickupPointId)
           : null;
 
+      const customerName = shippingAddr.name ?? billing.name ?? "";
+
       const emailPayload: OrderEmailInput = {
         id: order.id,
-        order_no: order.orderNo,
+       // order_no: order.orderNo,
         amount_total: totalHUF,
         currency: "HUF",
         customer_email: order.userEmail,
-        customer_name:
-          (order.shipping as any)?.name ?? (order.billing as any)?.name ?? "",
+        customer_name: customerName,
         payment_status: "cod",
         payment_label: "Utánvét",
-        billing: order.billing as any,
-        shipping: order.shipping as any,
-        pickupPoint: pickupPointInfo || undefined, // ← EZ KELL A LEVÉLBE
-        note: (order.note ?? null) as any,
+        //billing,
+        //shipping: shippingAddr,
+        pickupPoint: pickupPointInfo || undefined,
+       // note: order.note ?? null,
         totals: {
           subtotal: subtotalHUF,
           shipping: shippingHUF,
@@ -420,7 +447,6 @@ export async function POST(req: Request) {
     // --- 8) Kártyás (Stripe) ág — Price ID preferált, fallback price_data ---
 
     // opcionális: szállítási árakhoz külön Price ID-k (ENV-ből)
-    // Ha változó szállítási díjad van, hagyd üresen ezeket, és marad a dinamikus price_data.
     const SHIPPING_PRICE_IDS: Record<string, string | undefined> = {
       foxpost_locker: process.env.STRIPE_PRICE_SHIPPING_FOXPOST_LOCKER,
       foxpost_home: process.env.STRIPE_PRICE_SHIPPING_FOXPOST_HOME,
@@ -445,8 +471,10 @@ export async function POST(req: Request) {
               if (Math.abs(ratio - 100) < 0.5) hufScale = 100;
             }
           }
-          break; // elég egy mintából megállapítani
-        } catch {}
+          break;
+        } catch {
+          // ignore lookup errors, fallback remains 1
+        }
       }
     }
 
@@ -488,7 +516,6 @@ export async function POST(req: Request) {
 
       if (shippingPriceId) {
         // Fix összegű, Stripe-on előre létrehozott szállítási Price
-        // (figyelj, hogy a Stripe Price összege egyezzen a nálad számolt shippingHUF-fal)
         stripeLineItems.push({
           price: shippingPriceId,
           quantity: 1,
@@ -511,7 +538,7 @@ export async function POST(req: Request) {
       order_no: orderNo,
       shipping_method: shippingMethod,
       pickup_point_id: pickupPointId || "",
-      huf_scale: String(hufScale), // 1 vagy 100 – később jól jön
+      huf_scale: String(hufScale),
       billing_json: clip(billing),
       shipping_json: clip(shippingAddr),
       totals_json: clip({
@@ -554,20 +581,29 @@ export async function POST(req: Request) {
       { status: 200 }
     );
   } catch (err) {
-    const e = err as {
-      raw?: { message?: string; code?: string };
-      message?: string;
-      code?: string;
-    };
+    const e =
+      (err as {
+        raw?: { message?: string; code?: string };
+        message?: string;
+        code?: string;
+      }) || {};
     const msg =
-      e?.raw?.message ||
-      e?.message ||
+      e.raw?.message ||
+      e.message ||
       "Ismeretlen hiba a fizetési session létrehozásakor.";
-    const code = e?.raw?.code || e?.code;
+    const code = e.raw?.code || e.code;
     console.error("create-checkout-session error:", code || "", msg, err);
     return NextResponse.json(
       { error: msg, code: code || undefined },
       { status: 500 }
     );
   }
+}
+ */
+
+export async function GET() {
+  return new Response(JSON.stringify({ message: "Hello from app API!" }), {
+    status: 200,
+    headers: { "Content-Type": "application/json" },
+  });
 }

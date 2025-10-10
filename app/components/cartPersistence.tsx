@@ -4,11 +4,12 @@
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { replaceCart } from "@/app/store/slices/cartSlice";
-import { loadCart, saveCart } from "@/app/store/cartStorage";
+import { loadCart } from "@/app/store/cartStorage";
+import { RootState } from "../store/store";
 
 export default function CartPersistence() {
   const dispatch = useDispatch();
-  const cart = useSelector((s: any) => s.cart);
+  const cart = useSelector((s: RootState) => s.cart);
 
   // 1) betöltés első render után (SSR-safe)
   useEffect(() => {
@@ -19,7 +20,7 @@ export default function CartPersistence() {
   // 2) mentés: kis „debounce”, hogy ne írjunk túl sűrűn
   useEffect(() => {
     const id = setTimeout(() => {
-      if (cart) saveCart(cart);
+     // if (cart) saveCart(cart);
     }, 150);
     return () => clearTimeout(id);
   }, [cart]);

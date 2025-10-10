@@ -10,6 +10,7 @@ interface Header {
 interface Intro {
   title1: string;
   title2: string;
+  title3: string
   description: string;
   btn1: string;
   btn2: string;

@@ -17,12 +17,12 @@ export async function getFoxpostTerminalById(
   if (!r.ok) return null;
 
   const json = await r.json();
-  const rows: any[] = Array.isArray(json) ? json : json?.items || [];
+  const rows = Array.isArray(json) ? json : json?.items || [];
 
   // operator_id az elsődleges, fallback: place_id (sandboxban előfordul)
   const found =
-    rows.find((x) => String(x.operator_id) === String(id)) ||
-    rows.find((x) => String(x.place_id) === String(id));
+    rows.find((x: { operator_id: string; }) => String(x.operator_id) === String(id)) ||
+    rows.find((x: { place_id: string; }) => String(x.place_id) === String(id));
 
   if (!found) return null;
 

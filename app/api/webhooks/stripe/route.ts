@@ -1,9 +1,8 @@
-export const runtime = "nodejs";
+/* export const runtime = "nodejs";
 
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import { prisma } from "@/app/lib/prisma";
-import { sendOrderEmails } from "@/app/lib/email/send";
 import { foxpostFetch } from "@/app/lib/foxpostClient";
 import type {
   Order as PrismaOrder,
@@ -12,6 +11,8 @@ import type {
 import { OrderEmailInput } from "@/app/lib/email/templates/orderCustomer";
 import { normHuPhone } from "@/app/lib/phone";
 import { resolveFoxpostPickup } from "@/app/lib/foxpostPickup";
+
+const { sendOrderEmails } = await import("@/app/lib/email/send");
 
 // --- Stripe init ---
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
@@ -301,8 +302,8 @@ export async function POST(req: NextRequest) {
         // 7) E-mail payload (kártyás)
         const emailPayload: OrderEmailInput = {
           id: session.id,
-          order_no:
-            orderDb?.orderNo || session.client_reference_id || undefined,
+          //order_no:
+          //  orderDb?.orderNo || session.client_reference_id || undefined,
           amount_total: session.amount_total ?? 0,
           currency: (session.currency || "HUF").toUpperCase(),
           customer_email:
@@ -314,12 +315,12 @@ export async function POST(req: NextRequest) {
             session.customer_details?.name ||
             (asAddress(orderDb?.billing)?.name ?? ""),
           payment_status: session.payment_status, // "paid"
-          billing: asAddress(orderDb?.billing),
-          shipping: asAddress(orderDb?.shipping),
+          //billing: asAddress(orderDb?.billing),
+          //shipping: asAddress(orderDb?.shipping),
           shippingMethod,
-          pickupPointId: orderDb?.pickupPointId || pickupPointId,
+         // pickupPointId: orderDb?.pickupPointId || pickupPointId,
           pickupPoint: pickupPointInfo || undefined,
-          note: orderDb?.note ?? null,
+          //note: orderDb?.note ?? null,
           totals: {
             subtotal: orderDb?.subtotalHUF ?? undefined,
             shipping: orderDb?.shippingHUF ?? undefined,
@@ -378,4 +379,12 @@ export async function POST(req: NextRequest) {
       { status: 500 }
     );
   }
+}
+ */
+
+export async function GET() {
+  return new Response(JSON.stringify({ message: "Hello from app API!" }), {
+    status: 200,
+    headers: { "Content-Type": "application/json" },
+  });
 }

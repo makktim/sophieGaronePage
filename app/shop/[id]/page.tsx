@@ -1,17 +1,32 @@
-// app/product/[id]/page.tsx
-import { notFound } from "next/navigation";
+/* // app/product/[id]/page.tsx
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
+import { notFound } from "next/navigation";
 import ProductClient from "./ProductClient";
-import { prisma } from "@/app/lib/prisma";
+import { getPrisma, hasDb } from "@/app/lib/prisma";
+
+type MaybePromise<T> = T | Promise<T>;
+type RouteParams = { id: string };
 
 export default async function ProductPage({
   params,
 }: {
-  params: { id: string };
+  params: MaybePromise<RouteParams>;
 }) {
-  const product = await prisma.product.findUnique({
-    where: { id: params.id },
-  });
+  const { id } = await Promise.resolve(params);
+
+  // Ha nincs DB, itt döntsd el: notFound vagy mock
+  if (!hasDb) {
+    return notFound();
+    // vagy:
+    // const mapped = { ...mock };
+    // return <ProductClient product={mapped} />;
+  }
+
+  const prisma = getPrisma();
+  const product = await prisma.product.findUnique({ where: { id } });
+
   if (!product) return notFound();
 
   const mapped = {
@@ -19,7 +34,7 @@ export default async function ProductPage({
     title: product.title,
     price: product.priceHUF,
     currency: "HUF",
-    imageSrc: "/", // ha lesz kép meződ, ide tedd
+    imageSrc: "/",
     description:
       "A megrendelt könyvet a megjelenés dátuma után tudjuk átadni a futárszolgálatnak. Minden példányt dedikálunk és különleges könyvjelzőt adunk hozzá ajándékba.",
     meta: {
@@ -30,8 +45,13 @@ export default async function ProductPage({
     },
     inStock: (product.stock ?? 0) > 0,
     deliveryNote: "A megjelenés után 2–4 munkanap",
-    // deliveryNote: "2–4 munkanap",
   };
 
   return <ProductClient product={mapped} />;
+}
+ */
+
+export default async function ProductPage({}) {
+
+  return null;
 }

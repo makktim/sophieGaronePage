@@ -8,6 +8,8 @@ import MailIcon from "../icon/MailIcon";
 import TiktokIcon from "../icon/Tiktokicon";
 import { RootState } from "@/app/store/store";
 
+type FlatLink = { title?: string; link?: string };
+
 export default function Footer() {
   const { social, links } = useSelector((s: RootState) => ({
     social: s.content.content.footer.social,
@@ -87,11 +89,13 @@ export default function Footer() {
             © {new Date().getFullYear()} Sophie Garone
           </p>
           <nav className={styles.links} aria-label="Alsó menü">
-            {flatLinks?.map((m: any) => (
-              <a key={m.title} href={m.link} className={styles.link}>
-                {m.title}
-              </a>
-            ))}
+            {flatLinks?.map((m: FlatLink) => {
+              return (
+                <a key={m.title} href={m.link} className={styles.link}>
+                  {m.title}
+                </a>
+              );
+            })}
           </nav>
         </div>
       </div>

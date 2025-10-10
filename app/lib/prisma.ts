@@ -1,14 +1,14 @@
+// app/lib/prisma.ts
 import { PrismaClient } from "@prisma/client";
 
-const globalForPrisma = global as unknown as { prisma?: PrismaClient };
+export const hasDb = Boolean(process.env.DATABASE_URL);
 
-export const prisma =
-  globalForPrisma.prisma ??
-  new PrismaClient({
-    log:
-      process.env.NODE_ENV === "development"
-        ? ["query", "error", "warn"]
-        : ["error"],
-  });
+let _prisma: PrismaClient | null = null;
 
-if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
+export function getPrisma(): PrismaClient {
+  if (!hasDb) {
+    throw new Error("Database disabled (DATABASE_URL missing).");
+  }
+  if (!_prisma) _prisma = new PrismaClient();
+  return _prisma;
+}

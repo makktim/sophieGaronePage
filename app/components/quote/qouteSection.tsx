@@ -12,7 +12,7 @@ export default function Quote() {
 
   const nextIndex = useMemo(
     () => (index + 1) % quotes.length,
-    [index, quotes.length]
+    [index]
   );
 
   const current = quotes[index]?.quote ?? "";

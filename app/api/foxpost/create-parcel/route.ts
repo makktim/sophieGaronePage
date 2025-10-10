@@ -2,7 +2,7 @@
 import { NextResponse } from "next/server";
 import { foxpostFetch } from "@/app/lib/foxpostClient";
 import { normHuPhone } from "@/app/lib/phone";
-import { prisma } from "@/app/lib/prisma";
+
 
 type Address = {
   name?: string;
@@ -86,7 +86,7 @@ export async function POST(req: Request) {
       String(payload.paymentHint || "").toLowerCase() === "cod"
         ? Math.max(0, Math.round(Number(payload.totals?.total || 0)))
         : 0;
-    const size: "M" = "M";
+    const size = "M";
 
     let item: FoxParcelLockerItem | FoxParcelHomeItem | null = null;
 
@@ -153,10 +153,10 @@ export async function POST(req: Request) {
 
     // opcionális mentés a rendelésre
     if (payload.orderId && parcelId) {
-      await prisma.order.update({
+/*       await prisma.order.update({
         where: { id: payload.orderId },
         data: { shippingParcelId: parcelId },
-      });
+      }); */
     }
 
     return NextResponse.json(first);

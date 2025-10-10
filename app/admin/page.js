@@ -1,12 +1,12 @@
-import { prisma } from "@/lib/prisma";
+/* import { prisma } from "@/lib/prisma"; */
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminPage() {
-  const orders = await prisma.order.findMany({
+/*   const orders = await prisma.order.findMany({
     orderBy: { createdAt: "desc" },
     include: { items: { include: { product: true } } },
-  });
+  }); */
 
   return (
     <main className="p-6 max-w-5xl mx-auto">
@@ -24,7 +24,7 @@ export default async function AdminPage() {
             </tr>
           </thead>
           <tbody>
-            {orders.map((o) => (
+{/*             {orders.map((o) => (
               <tr key={o.id} className="border-b align-top">
                 <td className="p-3">{o.id}</td>
                 <td className="p-3">{o.userEmail}</td>
@@ -44,7 +44,7 @@ export default async function AdminPage() {
                   {new Date(o.createdAt).toLocaleString("hu-HU")}
                 </td>
               </tr>
-            ))}
+            ))} */}
           </tbody>
         </table>
       </div>

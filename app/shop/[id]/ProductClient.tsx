@@ -9,6 +9,15 @@ import book from "../../../public/assets/extra.png";
 import { addItem } from "@/app/store/slices/cartSlice";
 import { useToast } from "@/app/components/toast/ToastProvider";
 
+type ProductMeta = {
+  type?: string;        // pl. "könyv", "ebook", stb.
+  language?: string;    // pl. "magyar"
+  pages?: number;       // oldalszám
+  isbn?: string;
+  size?: string;        // pl. "135×205 mm"
+  [k: string]: unknown; // bővíthető, de any nélkül
+};
+
 type ClientProduct = {
   id: string;
   title: string;
@@ -16,7 +25,7 @@ type ClientProduct = {
   currency?: string;
   imageSrc: string;
   description?: string;
-  meta?: Record<string, any>;
+  meta?: ProductMeta;    // ← itt használjuk
   inStock?: boolean;
   deliveryNote?: string;
 };
