@@ -1,0 +1,59 @@
+.introMain {
+  position: relative;
+  padding: 16px 0;
+}
+
+.stage {
+  max-width: 1100px;
+  margin: 0 auto;
+  min-height: clamp(180px, 24vw, 320px);
+  display: grid;
+  place-items: center;
+}
+
+.quoteWrapper {
+  position: relative;
+  text-align: center;
+  width: min(90vw, 800px);
+  padding: clamp(8px, 2vw, 16px);
+  isolation: isolate;
+}
+
+.quoteWrapper::before,
+.quoteWrapper::after {
+  content: "“";
+  position: absolute;
+  font-size: clamp(84px, 14vw, 160px);
+  line-height: 1;
+  color: var(--foreground);
+  z-index: 0;
+  user-select: none;
+  pointer-events: none;
+  filter: blur(0.2px);
+}
+.quoteWrapper::before {
+  left: clamp(-6px, -2vw, -2px);
+  top: clamp(-1px, -2vw, 0);
+}
+.quoteWrapper::after {
+  content: "”";
+  right: clamp(-6px, -2vw, -2px);
+  bottom: clamp(-1px, -2vw, 0);
+}
+
+.text {
+  position: relative;
+  z-index: 1;
+  color: var(--foreground);
+  font-size: clamp(22px, 3.2vw, 40px);
+  line-height: 1.3;
+  max-width: 26ch;
+  margin: 0 auto;
+  text-wrap: balance;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .quoteWrapper {
+    animation: none !important;
+  }
+}

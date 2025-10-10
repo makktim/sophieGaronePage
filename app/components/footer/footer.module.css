@@ -1,0 +1,95 @@
+.footer {
+  --bg: #171717; /* sötét háttér */
+  --fg: #cbd5e1; /* alap szöveg */
+  --muted: #9aa9bb;
+  --accent: #8fbef1; /* ikon/hover kék */
+  --icon-bg: rgba(143, 190, 241, 0.12);
+  --icon-border: rgba(143, 190, 241, 0.22);
+
+  background: var(--bg);
+  color: var(--foreground);
+  padding: 48px 20px 36px;
+}
+
+.container {
+  max-width: 1100px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+/* ikon gombsor */
+.icons {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  margin-bottom: 14px;
+}
+.iconBtn {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 999px;
+  background: var(--backgroundLight);
+  border: 1px solid var(--icon-border);
+  color: var(--foreground);
+  transition: transform 0.15s ease, background 0.2s ease, color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+.iconBtn:hover {
+  transform: translateY(-2px);
+  background: var(--backgroundLight);
+  color: var(--foreground);
+  box-shadow: 0 10px 22px var(--backgroundLight);
+}
+
+/* e-mail középen */
+.email {
+  display: inline-block;
+  margin-top: 6px;
+  color: var(--foreground);
+  text-decoration: none;
+  font-size: 16px;
+}
+.email:hover {
+  color: var(--foreground);
+}
+
+/* alsó sor */
+.bottom {
+  margin-top: 22px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px 28px;
+  align-items: center;
+  justify-content: center;
+}
+.copy {
+  color: var(--backgroundLight);
+  font-size: 14px;
+  margin: 0 10px 0 0;
+}
+.links {
+  display: inline-flex;
+  gap: 18px;
+  flex-wrap: wrap;
+}
+.link {
+  color: var(--backgroundLight);
+  text-decoration: none;
+  font-size: 16px;
+}
+.link:hover {
+  color: var(--foreground);
+}
+
+/* mobil finomhangolás */
+@media (max-width: 520px) {
+  .iconBtn {
+    width: 48px;
+    height: 48px;
+  }
+  .links {
+    gap: 14px;
+  }
+}

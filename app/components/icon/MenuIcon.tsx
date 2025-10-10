@@ -1,0 +1,26 @@
+type MenuIconProps = {
+  size?: number;
+  color?: string;
+  className?: string;
+};
+
+const MenuIcon = ({
+  size = 24,
+  color = "rgba(240, 237, 230, 0.72)",
+}: MenuIconProps) => (
+  <svg
+    viewBox="0 0 24 24"
+    stroke-width="2.2"
+    stroke-linecap="round"
+    width={size}
+    height={size}
+    fill={color}
+    stroke={color}
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <line x1="3" y1="6" x2="21" y2="6" />
+    <line x1="3" y1="12" x2="21" y2="12" />
+    <line x1="3" y1="18" x2="21" y2="18" />
+  </svg>
+);
+export default MenuIcon;

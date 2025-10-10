@@ -1,0 +1,71 @@
+{
+  "Header": {
+    "menuitem": [
+      { "value": "First chapter", "onclick": "CreateNewDoc()" },
+      { "value": "About", "onclick": "OpenDoc()" },
+      { "value": "Shop", "onclick": "CloseDoc()" },
+      { "value": "contact", "onclick": "CloseDoc()" }
+    ]
+  },
+  "intro": {
+    "title": "Elveszítettem mindent...",
+    "description": "csak hogy megtaláljam azt, amire mindig is vágytam.",
+    "btn1": "Első fejezet",
+    "btn2": "Előrendelés"
+  },
+  "about": {
+    "title": "Ismerj meg minket",
+    "description": "Aliquam euismod id nibh et mollis. Donec scelerisque odio et ligula interdum efficitur.",
+    "paragraph": "Aliquam euismod id nibh et mollis. Donec scelerisque odio et ligula interdum efficitur. Sed dictum massa et ex mollis, eu laoreet orci auctor. In vel ornare risus. Aliquam vel mi vitae orci laoreet tincidunt. Sed feugiat elit vitae enim faucibus, id placerat quam iaculis. Mauris et neque nec mauris porta facilisis eget pellentesque purus.",
+    "btn": "Rólunk"
+  },
+  "subscribe": {
+    "title": "Iratkozz fel hírlevelünkre",
+    "btn": "Feliratkozás"
+  },
+  "categories": [
+    { "title": "title", "icon": "", "description": "" },
+    { "title": "title", "icon": "", "description": "" },
+    { "title": "title", "icon": "", "description": "" }
+  ],
+  "firstChapter": {
+    "title": "Az első fejezet",
+    "description": "Ismerd meg a történetünket, olvasd el az első fejezetet",
+    "paragraph": "Aliquam euismod id nibh et mollis. Donec scelerisque odio et ligula interdum efficitur. Sed dictum massa et ex mollis, eu laoreet orci auctor. In vel ornare risus. Aliquam vel mi vitae orci laoreet tincidunt. Sed feugiat elit vitae enim faucibus, id placerat quam iaculis. Mauris et neque nec mauris porta facilisis eget pellentesque purus.",
+    "btn": "Tovább"
+  },
+  "footer": {
+    "social": {
+      "title": "Maradjunk kapcsolatban",
+      "email": "writersophiegarone@gmail.com",
+      "socialLinks": [
+        { "value": "Facebook", "link": "" },
+        { "value": "Instagram", "link": "" },
+        { "value": "Tiktok", "link": "" }
+      ]
+    },
+    "form": {
+      "title": "Küldj nekünk üzenetet!",
+      "btn": "Küldés"
+    },
+    "links": [
+      {
+        "title": "Information",
+        "menu": [
+          { "title": "Terms & conditions", "link": "" },
+          { "title": "Privacy policy", "link": "" },
+          { "title": "Contact", "link": "" }
+        ]
+      },
+      {
+        "title": "Menu",
+        "menu": [
+          { "title": "Home", "link": "/" },
+          { "title": "First chapter", "link": "/firstChapter" },
+          { "title": "About", "link": "/about" },
+          { "title": "shop", "link": "/shop" }
+        ]
+      }
+    ]
+  }
+}

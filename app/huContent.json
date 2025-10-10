@@ -1,0 +1,99 @@
+{
+  "Header": {
+    "menuitem": [
+      { "value": "Első fejezet", "link": "/firstChapter" },
+      { "value": "Rólunk", "link": "/about" },
+      { "value": "Kapcsolat", "link": "/contact" }
+    ]
+  },
+  "intro": {
+    "title1": "Elveszítettem mindent...",
+    "title2": "hogy megtaláljam azt,",
+    "title3": "amire mindig is vágytam.",
+    "description": "Várható megjelenés: 2025.10.28.",
+    "btn1": "Első fejezet",
+    "btn2": "Előrendelés"
+  },
+  "about": {
+    "title": "Ismerj meg minket",
+    "description": "Kik is vagyunk?",
+    "paragraph": "Kyra és Matt kalandja, igazából közös képzeletünk szüleménye. Ketten alkottuk. Együtt. Mindig is rajongtunk az olyan történetekért, ahol a misztikum és az érzelmek találkoznak, ahol a főhősöknek nemcsak a külső ellenségeikkel, hanem a saját érzéseikkel is meg kell küzdeniük.",
+    "btn": "Tudd meg, hogyan született Kyra és Matt története"
+  },
+  "subscribe": {
+    "title": "Iratkozz fel és kapd kézhez elsőként könyvünket!",
+    "description": "Ha szeretnél értesülni a könyvmegjelenésekről és exkluzív tartalmakról, iratkozz fel a hírlevelünkre!",
+    "btn": "Feliratkozás"
+  },
+  "categories": [
+    {
+      "title": "Vicces",
+      "icon": "masks",
+      "description": " Kyra, aki eddig csak a kötelességeinek élt, most először próbálja ki a földi élet apró örömeit. Egy őrangyal, aki nem ismeri a tréfát komoly próba elé állít nap mint nap Matt a szarkasztikus megjegyzéseivel."
+    },
+    {
+      "title": "Romantikus",
+      "icon": "heart",
+      "description": "A tiltott érintés, egy angyal bukása és egy szerelem, ami mindent megváltoztat. Kyra és Matt kapcsolata több mint egy egyszerű vonzalom – sorsuk összefonódik, miközben a démonok a nyomukban járnak. De vajon egy őrangyal képes lehet-e igazán szeretni, ha ezért mindent kockára kell tennie?"
+    },
+    {
+      "title": "Izgalmas",
+      "icon": "bolt",
+      "description": "  Egy titok lappang Matt múltjában, és Kyra a saját életét kockáztatja, hogy megvédje őt. Látványos harcok, rejtélyek, árulás és egy világ, ahol semmi sem az, aminek látszik. Ha szereted az akcióval és misztikummal átszőtt fantasy történeteket, akkor készülj, mert itt senki sincs biztonságban!"
+    }
+  ],
+  "firstChapter": {
+    "title": "Az első fejezet",
+    "description": "Kóstolj bele a történetünkbe, olvasd el az első fejezetet",
+    "paragraph": "Képzeld el, hogy egy őrangyal évszázadok óta teljesíti a küldetését – mígnem egyetlen pillanat mindent megváltoztat. Kyra egyike a legjobb harcosoknak, de amikor megszegi az őrangyalok legszentebb szabályát és megérinti védencét, Mattet, mindent elveszít: az erejét, a szárnyait… és az eddigi életét. Most emberként kell szembenéznie az ellenségekkel, akik Matt életére törnek, miközben saját érzéseivel is küzd. Miért akarják a démonok ezt a fiút? Mi az a titok, ami mindkettejük sorsát megpecsételheti?",
+    "quote": "Ha szereted a rejtélyes, érzelmekkel és akcióval teli fantasy-történeteket, akkor ez a könyv neked szól!",
+    "btn": "Tovább az első fejeztre"
+  },
+  "footer": {
+    "social": {
+      "title": "Hol érhetsz el minket?",
+      "email": "writersophiegarone@gmail.com",
+      "socialLinks": [
+        {
+          "value": "Facebook",
+          "link": "https://www.facebook.com/profile.php?id=61576026050694",
+          "img": "facebook",
+          "alt": "facebook"
+        },
+        {
+          "value": "Instagram",
+          "link": "https://www.instagram.com/sophiegarone",
+          "img": "instagram",
+          "alt": "instagram"
+        },
+        {
+          "value": "Tiktok",
+          "link": "https://www.tiktok.com/@sophiegarone",
+          "img": "tiktok",
+          "alt": "tiktok"
+        }
+      ]
+    },
+    "form": {
+      "title": "Küldj nekünk üzenetet!",
+      "btn": "Küldés"
+    },
+    "links": [
+      {
+        "title": "Információk",
+        "menu": [
+          { "title": "ÁSZF", "link": "/aszf" },
+          { "title": "Adatvédelmi nyilatkozat", "link": "/adatvedelem" }
+        ]
+      },
+      {
+        "title": "Menu",
+        "menu": [
+          { "title": "Home", "link": "/" },
+          { "title": "Első fejezet", "link": "/firstChapter" },
+          { "title": "Rólunk", "link": "/about" }
+        ]
+      }
+    ]
+  }
+}

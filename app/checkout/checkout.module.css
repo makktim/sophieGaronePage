@@ -1,0 +1,307 @@
+.page {
+  width: 100%;
+  color: var(--foreground);
+}
+.title {
+  font-size: clamp(24px, 2.6vw, 36px);
+  margin: 16px;
+}
+
+.empty {
+  margin: 24px 16px 80px;
+  padding: 24px;
+  border-radius: 16px;
+  background: color-mix(in oklab, var(--foreground) 8%, transparent);
+  text-align: center;
+}
+.linkBtn {
+  display: inline-block;
+  margin-top: 8px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: var(--foreground);
+  color: var(--background);
+  text-decoration: none;
+}
+
+.grid {
+  display: grid;
+  gap: 20px;
+  padding: 8px 16px 96px;
+  grid-template-columns: minmax(0, 1fr) 380px;
+}
+@media (max-width: 980px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.formCol {
+  display: grid;
+  gap: 16px;
+}
+
+.group {
+  border: 1px solid color-mix(in oklab, var(--foreground) 16%, transparent);
+  background: color-mix(in oklab, var(--foreground) 10%, transparent);
+  border-radius: 14px;
+  padding: 16px;
+  display: grid;
+  gap: 12px;
+}
+
+.row2 {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: 1fr 1fr;
+}
+.row3 {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: 140px 1fr 1.2fr;
+}
+@media (max-width: 720px) {
+  .row2,
+  .row3 {
+    grid-template-columns: 1fr;
+  }
+}
+
+.field {
+  display: grid;
+  gap: 6px;
+}
+
+.radioRow {
+  display: grid;
+  gap: 8px;
+}
+.radio {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.radio input {
+  transform: translateY(1px);
+}
+.badge {
+  margin-left: auto;
+  font-style: normal;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--foreground) 12%, transparent);
+}
+
+.check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.smallNote {
+  font-size: 13px;
+  opacity: 0.85;
+}
+
+.error {
+  border: 1px solid #e66;
+  background: #3b1f1f;
+  color: var(--paragraph);
+  padding: 10px 12px;
+  border-radius: 10px;
+}
+
+.primary,
+.primaryGhost {
+  border: none;
+  border-radius: 12px;
+  padding: 12px 16px;
+  font-weight: 600;
+  transition: transform 0.06s ease, opacity 0.2s ease;
+}
+.primary {
+  background: var(--foreground);
+  color: var(--background);
+}
+.primaryGhost {
+  background: transparent;
+  color: var(--foreground);
+  border: 1px solid color-mix(in oklab, var(--foreground) 30%, transparent);
+}
+.primary:hover,
+.primaryGhost:hover {
+  transform: translateY(-1px);
+}
+.primary:disabled,
+.primaryGhost:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.summary {
+  position: relative;
+}
+@media (min-width: 981px) {
+  .summary {
+    position: sticky;
+    top: 16px;
+    align-self: start;
+  }
+}
+.sumCard {
+  display: grid;
+  gap: 10px;
+  padding: 16px;
+  border-radius: 14px;
+  background: color-mix(in oklab, var(--foreground) 10%, transparent);
+  border: 1px solid color-mix(in oklab, var(--foreground) 16%, transparent);
+}
+.sumRow {
+  display: flex;
+  justify-content: space-between;
+}
+.sumTotal {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 18px;
+}
+.summaryNote {
+  font-size: 13px;
+  opacity: 0.85;
+}
+
+.sticky {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: none;
+  padding: 12px 16px;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  background: color-mix(in oklab, var(--background) 85%, black);
+  border-top: 1px solid color-mix(in oklab, var(--foreground) 15%, transparent);
+  backdrop-filter: blur(6px);
+  z-index: 50;
+}
+@media (max-width: 980px) {
+  .sticky {
+    display: flex;
+  }
+}
+.stickyPrice {
+  font-weight: 700;
+}
+.stickyBtn {
+  border: none;
+  border-radius: 12px;
+  padding: 12px 16px;
+  font-weight: 600;
+  background: var(--foreground);
+  color: var(--background);
+}
+
+/* --- RADIO & CHECKBOX – egységes, dark-friendly stílus --- */
+
+/* modern böngészők: ha van, használjuk az accent-colort is (fallback) */
+.radio input[type="radio"],
+.check input[type="checkbox"] {
+  accent-color: var(--foreground);
+}
+
+/* teljes egyedi rajzolás – mindenhol egységes */
+.radio input[type="radio"],
+.check input[type="checkbox"] {
+  -webkit-appearance: none;
+  appearance: none;
+  inline-size: 20px;
+  block-size: 20px;
+  display: inline-grid;
+  place-content: center;
+  margin: 0; /* a gap intézi a rést */
+  border: 2px solid color-mix(in oklab, var(--foreground) 45%, transparent);
+  background: transparent;
+  transition: box-shadow 0.15s ease, border-color 0.15s ease,
+    background 0.15s ease;
+  outline: none;
+}
+
+/* forma: kör a rádiónak, kocka a checkboxnak */
+.radio input[type="radio"] {
+  border-radius: 999px;
+}
+.check input[type="checkbox"] {
+  border-radius: 6px;
+}
+
+/* fókuszgyűrű billentyűzetnél */
+.radio input[type="radio"]:focus-visible,
+.check input[type="checkbox"]:focus-visible {
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--foreground) 20%, transparent);
+  border-color: color-mix(in oklab, var(--foreground) 65%, transparent);
+}
+
+/* hover egy kis emeléssel */
+.radio:hover input[type="radio"],
+.check:hover input[type="checkbox"] {
+  border-color: color-mix(in oklab, var(--foreground) 60%, transparent);
+}
+
+/* --- belső jelölés --- */
+.radio input[type="radio"]::after,
+.check input[type="checkbox"]::after {
+  content: "";
+  transform: scale(0);
+  transition: transform 0.12s ease;
+}
+
+/* rádió: pont */
+.radio input[type="radio"]::after {
+  inline-size: 10px;
+  block-size: 10px;
+  border-radius: 999px;
+  background: var(--foreground);
+}
+
+/* checkbox: pipa + sötét háttér, hogy legyen kontraszt */
+.check input[type="checkbox"]::after {
+  inline-size: 10px;
+  block-size: 6px;
+  border-right: 2px solid var(--background);
+  border-bottom: 2px solid var(--background);
+  transform-origin: center;
+  rotate: 45deg;
+}
+
+/* checked állapot */
+.radio input[type="radio"]:checked {
+  border-color: var(--foreground);
+}
+.check input[type="checkbox"]:checked {
+  border-color: var(--foreground);
+  background: var(--foreground);
+}
+
+.radio input[type="radio"]:checked::after,
+.check input[type="checkbox"]:checked::after {
+  transform: scale(1);
+}
+
+/* disabled állapot */
+.radio input[type="radio"]:disabled,
+.check input[type="checkbox"]:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* sor szövegei egy hangon */
+.radio span,
+.check span,
+.check a {
+  color: var(--foreground);
+}
+
+.pickupSummary {
+  margin-top: 16px;
+}

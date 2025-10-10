@@ -1,0 +1,69 @@
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL") // app: pooled
+  directUrl = env("DIRECT_URL") // migrate: direct
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Product {
+  id        String      @id @default(uuid())
+  title     String
+  priceHUF  Int
+  stock     Int         @default(0)
+  createdAt DateTime    @default(now())
+  stripePriceId String?
+  items     OrderItem[] 
+}
+
+model Order {
+  id               String      @id @default(uuid())
+  createdAt        DateTime    @default(now())
+  userEmail        String
+  status           OrderStatus @default(PENDING)
+
+  orderNo          String  @unique
+
+  totalHUF         Int
+  subtotalHUF      Int
+  shippingHUF      Int
+  discountHUF      Int
+
+  paymentMethod    String
+  shippingMethod   String
+  pickupPointId    String
+  shippingParcelId String?      // ← ajánlott: opcionális
+
+  billing          Json
+  shipping         Json
+  note             String
+
+  items            OrderItem[]
+  @@index([orderNo])
+}
+
+
+
+
+model OrderItem {
+  id        String  @id @default(uuid())
+  order     Order   @relation(fields: [orderId], references: [id])
+  orderId   String
+  product   Product @relation(fields: [productId], references: [id])
+  productId String
+  qty       Int
+  priceHUF  Int
+
+  @@index([orderId])
+  @@index([productId])
+}
+
+enum OrderStatus {
+  PENDING
+  PAID
+  FAILED
+  CANCELLED
+  FULFILLED
+}

@@ -1,0 +1,127 @@
+.page {
+  min-height: 60vh;
+  display: grid;
+  place-items: center;
+  padding: 32px 16px;
+}
+
+.card {
+  width: 100%;
+  max-width: 640px;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 10px 24px rgba(17, 24, 39, 0.04);
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  background: #2e3330;
+  color: var(--paragraph);
+  display: inline-grid;
+  place-items: center;
+  font-weight: 800;
+  margin: 0 auto 10px;
+}
+
+.title {
+  margin: 0 0 6px;
+  font-size: 24px;
+  line-height: 1.2;
+  color: var(--paragraph);
+}
+
+.lead {
+  margin: 0;
+  color: var(--paragraph);
+}
+
+.block {
+  margin-top: 18px;
+  padding: 16px;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.label {
+  color: var(--paragraph);
+}
+
+.valueMono {
+  font-weight: 700;
+  color: var(--paragraph);
+  word-break: brek-all;
+}
+
+.muted {
+  margin: 6px 0 0;
+  color: var(--paragraph);
+  font-size: 14px;
+}
+
+.actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.primaryBtn,
+.ghostBtn {
+  appearance: none;
+  border: 1px solid;
+  padding: 10px 16px;
+  border-radius: 10px;
+  font-weight: 700;
+  text-align: center;
+  text-decoration: none;
+  transition: transform 0.03s ease, box-shadow 0.15s ease;
+}
+
+.primaryBtn {
+  background: linear-gradient(180deg, #183025 0%, #0b1a15 100%);
+  color: var(--paragraph);
+  box-shadow: 0 4px 12px #183025;
+}
+
+.ghostBtn {
+  background: transparent;
+  color: var(--paragraph);
+  font-weight: 600;
+  padding: 12px 28px;
+  border-radius: 8px;
+  border: 1px solid;
+}
+
+.primaryBtn:hover,
+.ghostBtn:hover {
+  background: linear-gradient(180deg, #183025 0%, #0b1a15 100%);
+  color: var(--paragraph);
+  box-shadow: 0 6px 18px #183025;
+}
+
+.smallNote {
+  margin-top: 14px;
+  text-align: center;
+  color: var(--paragraph);
+  font-size: 12px;
+}
+
+.link {
+  color: var(--paragraph);
+  text-decoration: underline;
+}

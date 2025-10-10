@@ -1,0 +1,25 @@
+type CloseIconProps = {
+  size?: number;
+  color?: string;
+  className?: string;
+};
+
+const CloseIcon = ({
+  size = 24,
+  color = "rgba(240, 237, 230, 0.72)",
+}: CloseIconProps) => (
+  <svg
+    viewBox="0 0 24 24"
+    stroke-width="2.2"
+    stroke-linecap="round"
+    width={size}
+    height={size}
+    fill={color}
+    stroke={color}
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <line x1="5" y1="5" x2="19" y2="19" />
+    <line x1="19" y1="5" x2="5" y2="19" />
+  </svg>
+);
+export default CloseIcon;

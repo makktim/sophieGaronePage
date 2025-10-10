@@ -1,0 +1,235 @@
+/* pickup.module.css */
+
+/* --- Backdrop & modal --- */
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(2px);
+  animation: fade-in 160ms ease-out;
+}
+
+.modal {
+  width: min(920px, 100%);
+  max-height: min(85vh, 900px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+
+  background: linear-gradient(
+    180deg,
+    var(--surface-800, #0e1416) 0%,
+    var(--surface-700, #151c1f) 100%
+  );
+  color: var(--text, #e9eef2);
+  border: 1px solid var(--ring, #23323a);
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
+
+  animation: pop 160ms cubic-bezier(0.2, 0.9, 0.2, 1);
+}
+
+/* --- Header --- */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--ring, #23323a);
+}
+
+.header h3 {
+  margin: 0;
+  font-size: 1.05rem;
+  letter-spacing: 0.2px;
+}
+
+/* --- Close button --- */
+.close {
+  appearance: none;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text, #e9eef2);
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  line-height: 1;
+  cursor: pointer;
+  opacity: 0.8;
+  transition: opacity 0.12s ease, background-color 0.12s ease,
+    border-color 0.12s ease;
+}
+.close:hover {
+  opacity: 1;
+  background: var(--surface-700, #151c1f);
+}
+.close:focus-visible {
+  outline: none;
+  border-color: var(--ring, #23323a);
+  box-shadow: 0 0 0 3px
+    color-mix(in oklab, var(--ring, #23323a) 30%, transparent);
+}
+
+/* --- Controls (search) --- */
+.controls {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--ring, #23323a);
+}
+
+.search {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--ring, #23323a);
+  background: var(--surface-700, #151c1f);
+  color: var(--text, #e9eef2);
+  outline: none;
+  transition: border-color 0.12s ease, box-shadow 0.12s ease;
+}
+.search::placeholder {
+  color: var(--muted, #9aa6b2);
+}
+.search:focus-visible {
+  border-color: var(--ring, #2f4955);
+  box-shadow: 0 0 0 3px
+    color-mix(in oklab, var(--ring, #2f4955) 30%, transparent);
+}
+
+/* --- Loading / Error --- */
+.loading,
+.error {
+  padding: 18px;
+  font-size: 0.95rem;
+}
+.error {
+  color: #ffb4b4;
+}
+
+/* --- List --- */
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow: auto;
+  min-height: 180px;
+}
+
+/* --- Item row --- */
+.item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  border: 1px solid var(--ring, #23323a);
+  border-radius: 14px;
+  background: color-mix(in oklab, var(--surface-800, #0e1416) 85%, black);
+  transition: background-color 0.12s ease, border-color 0.12s ease,
+    transform 0.06s ease;
+}
+.item:hover {
+  background: color-mix(in oklab, var(--surface-700, #151c1f) 92%, black);
+  border-color: color-mix(in oklab, var(--ring, #23323a) 80%, #3a4b55);
+}
+.item:active {
+  transform: translateY(1px);
+}
+
+.itemMain {
+  min-width: 0;
+  display: grid;
+  gap: 4px;
+}
+.itemMain strong {
+  font-size: 0.98rem;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.addr {
+  font-size: 0.9rem;
+  color: var(--muted, #9aa6b2);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* --- Select button --- */
+.select {
+  flex-shrink: 0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--ring, #23323a);
+  background: var(--surface-700, #151c1f);
+  color: var(--text, #e9eef2);
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.12s ease, border-color 0.12s ease,
+    box-shadow 0.12s ease, transform 0.06s ease;
+}
+.select:hover {
+  background: color-mix(in oklab, var(--surface-700, #151c1f) 85%, #0b0f11);
+  border-color: color-mix(in oklab, var(--ring, #23323a) 75%, #3a4b55);
+}
+.select:active {
+  transform: translateY(1px);
+}
+.select:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px
+    color-mix(in oklab, var(--ring, #2f4955) 30%, transparent);
+}
+
+/* --- Animations --- */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes pop {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* --- Responsive --- */
+@media (max-width: 640px) {
+  .modal {
+    border-radius: 14px;
+  }
+  .item {
+    align-items: flex-start;
+  }
+  .select {
+    padding: 9px 11px;
+  }
+}
+
+/* --- Reduced motion --- */
+@media (prefers-reduced-motion: reduce) {
+  .backdrop,
+  .modal {
+    animation: none;
+  }
+  .item,
+  .select {
+    transition: none;
+  }
+}

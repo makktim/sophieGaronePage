@@ -1,0 +1,84 @@
+.bookMain {
+  margin: 50px auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.readerWrap {
+  width: 100%;
+  max-width: 760px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.title {
+  padding-bottom: 16px;
+  text-align: center;
+  font-size: 36px;
+  color: var(--foreground);
+}
+
+.measure {
+  position: absolute;
+  visibility: hidden;
+  pointer-events: none;
+  white-space: normal;
+  width: 100%;
+  max-width: 760px;
+  font-size: clamp(18px, 1.9vw, 20px);
+  line-height: 1.75;
+}
+
+.book {
+  height: 500px;
+  max-height: 700px;
+  overflow: hidden;
+  padding-right: 0;
+  background: linear-gradient(180deg, #183025 0%, #0b1a15 100%);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 18px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+}
+
+.pageContent {
+  font-size: clamp(18px, 1.9vw, 20px);
+  line-height: 26px;
+  color: #eaf2fb;
+  padding: clamp(20px, 3vw, 36px);
+  text-align: inherit;
+}
+
+.chapterNav {
+  display: flex;
+  gap: 14px;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  max-width: 760px;
+  margin-top: 18px;
+}
+
+.navLink {
+  background: transparent;
+  border: 0;
+  color: var(--foreground);
+  font-weight: 700;
+  cursor: pointer;
+  padding: 6px 0;
+  transition: color 0.2s, transform 0.2s;
+}
+.navLink:disabled {
+  color: var(--muted);
+  cursor: not-allowed;
+}
+.navLink:hover:not(:disabled) {
+  color: var(--paragraph);
+  transform: translateY(-2px);
+}
+
+.pageInfo {
+  color: var(--paragraph);
+  font-size: 14px;
+}

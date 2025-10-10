@@ -1,0 +1,127 @@
+/* Alap layout */
+.main {
+  max-width: 56rem; /* ~896px */
+  margin: 0 auto;
+  padding: 2.5rem 1.25rem;
+  color: var(--foreground);
+  background: linear-gradient(
+    180deg,
+    var(--aszf-bg),
+    #0a0d0e 60%,
+    var(--aszf-bg)
+  );
+}
+
+/* Címek és meta */
+.title {
+  font-size: clamp(1.75rem, 1.2rem + 2vw, 2.25rem);
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  margin: 0 0 0.75rem 0;
+}
+
+.meta {
+  color: var(--muted);
+  font-size: 0.9rem;
+  margin: 0 0 2rem 0;
+}
+
+/* Tartalomjegyzék */
+.toc {
+  background: linear-gradient(180deg, #183025 0%, #0b1a15 100%);
+  border: 1px solid var(--foreground);
+  border-radius: 12px;
+  padding: 1rem 1rem 1.1rem;
+  margin-bottom: 2rem;
+}
+
+.tocLabel {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.tocList {
+  list-style: disc;
+  padding-left: 1.1rem;
+  margin: 0;
+}
+
+.tocList li {
+  margin: 0.25rem 0;
+}
+
+.toc a {
+  color: var(--foreground);
+  text-decoration: none;
+}
+.toc a:hover,
+.toc a:focus {
+  text-decoration: underline;
+}
+
+/* Szekciók */
+.section {
+  margin-bottom: 1.5rem;
+}
+
+.sectionTitle {
+  font-size: clamp(1.1rem, 0.95rem + 0.6vw, 1.25rem);
+  font-weight: 700;
+  margin: 0 0 0.5rem 0;
+}
+
+/* Listák */
+.listPlain {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.listPlain li {
+  margin: 0.35rem 0;
+}
+
+.listDisc,
+.listDiscTight {
+  list-style: disc;
+  padding-left: 1.25rem;
+  margin: 0.35rem 0 0 0;
+}
+.listDisc li {
+  margin: 0.35rem 0;
+}
+.listDiscTight li {
+  margin: 0.2rem 0;
+}
+
+.listDecimal {
+  list-style: decimal;
+  padding-left: 1.25rem;
+  margin: 0.35rem 0 0 0;
+}
+.listDecimal li {
+  margin: 0.35rem 0;
+}
+
+/* Elválasztó a minta előtt */
+.dividerTop {
+  border-top: 1px solid var(--foreground);
+  padding-top: 1rem;
+  margin-top: 2rem;
+}
+
+/* Kis margó helper */
+.mtSm {
+  margin-top: 0.75rem;
+}
+
+/* Nyomtatás-barát mód: fehér háttér, fekete szöveg */
+@media print {
+  .main {
+    background: #ffffff !important;
+    color: #000000;
+    padding: 0;
+  }
+  .toc {
+    border: 1px solid #cccccc;
+  }
+}

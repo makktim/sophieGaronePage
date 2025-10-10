@@ -1,0 +1,224 @@
+.font-dancing {
+  font-family: "Dancing Script", ui-serif, Georgia, serif;
+}
+
+.page {
+  width: 100%;
+  color: var(--foreground);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 560px 1fr;
+  gap: 22px;
+  padding: 24px 30px 64px;
+}
+@media (max-width: 900px) {
+  .grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+    padding: 16px 16px 96px;
+  }
+}
+.media {
+  position: relative;
+}
+@media (min-width: 901px) {
+  .media {
+    position: sticky;
+    top: 24px;
+    align-self: start;
+  }
+}
+
+.imageWrap {
+  position: relative;
+  aspect-ratio: 2 / 3;
+  border-radius: 12px;
+  overflow: hidden;
+  background: color-mix(in oklab, var(--foreground) 12%, transparent);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.18);
+  height: 600px;
+  margin: auto;
+}
+
+.image {
+  position: absolute;
+  inset: 0;
+  object-fit: contain;
+  object-position: center;
+}
+.content {
+  display: grid;
+  align-content: start;
+  gap: 18px;
+}
+
+.header {
+  display: grid;
+  gap: 12px;
+}
+.title {
+  font-size: clamp(24px, 2.8vw, 40px);
+  line-height: 1.15;
+  margin: 0;
+}
+.priceRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.price {
+  font-weight: 700;
+  font-size: clamp(20px, 2vw, 28px);
+}
+.stockOk {
+  font-size: 14px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--backgroundLight);
+  color: var(--text);
+}
+.stockNo {
+  font-size: 14px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #f66;
+  color: #300;
+}
+.lead {
+  max-width: 65ch;
+  opacity: 0.9;
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+/* Specifikációk – dl rácsban */
+.specs {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 8px 16px;
+  max-width: 560px;
+}
+.specs dt {
+  opacity: 0.8;
+}
+.specs dd {
+  margin: 0;
+}
+
+/* CTA blokk */
+.purchase {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.qtyWrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: color-mix(in oklab, var(--foreground) 8%, transparent);
+  padding: 6px;
+  border-radius: 10px;
+}
+.qtyBtn {
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 8px;
+  background: var(--foreground);
+  color: var(--background);
+  cursor: pointer;
+}
+.qtyBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.qtyInput {
+  width: 44px;
+  text-align: center;
+  font: inherit;
+  border: 1px solid color-mix(in oklab, var(--foreground) 35%, transparent);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--foreground);
+  padding: 6px 0;
+}
+.addBtn {
+  border: none;
+  color: var(--background);
+  padding: 12px 16px;
+  background: var(--foreground);
+  border-radius: 12px;
+  font-weight: 600;
+  transition: transform 0.06s ease, opacity 0.2s ease;
+}
+.addBtn:hover {
+  transform: translateY(-1px);
+}
+.addBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.deliveryNote {
+  opacity: 0.85;
+}
+
+/* Mobil ragadós CTA sáv */
+.stickyBar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px;
+  background: color-mix(in oklab, var(--background) 85%, black);
+  backdrop-filter: blur(6px);
+  border-top: 1px solid color-mix(in oklab, var(--foreground) 15%, transparent);
+  z-index: 50;
+}
+@media (max-width: 900px) {
+  .stickyBar {
+    display: flex;
+  }
+}
+.stickyPrice {
+  font-weight: 700;
+}
+.stickyBtn {
+  border: none;
+  color: var(--background);
+  background: var(--foreground);
+  padding: 12px 16px;
+  border-radius: 12px;
+  font-weight: 600;
+}
+
+.descTitle {
+  opacity: 0.8;
+}
+
+.descOneLine {
+  font-family: "Dancing Script", ui-serif, Georgia, serif;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.description {
+  line-height: 26px;
+}
+
+.priceOld {
+  text-decoration: line-through;
+  opacity: 0.65;
+  font-weight: 500; /* marad elegáns, nem túl vékony */
+}
