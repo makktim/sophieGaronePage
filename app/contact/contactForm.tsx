@@ -70,6 +70,7 @@ export default function ContactForm() {
             <input
               className={styles.input}
               id="name"
+              name="name"
               placeholder="John Doe"
               type="text"
               value={formData.name}
