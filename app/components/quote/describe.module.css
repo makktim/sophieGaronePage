@@ -26,6 +26,11 @@
   align-items: center;
   flex-direction: column;
   flex-wrap: wrap;
+
+   @media (max-width: 768px) {
+      text-align: center;
+
+}
 }
 
 .image {

@@ -68,3 +68,9 @@
   font-weight: 500;
   margin-top: 16px;
 }
+
+.title {
+   @media (max-width: 768px) {
+      text-align: center;
+  }
+}

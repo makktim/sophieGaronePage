@@ -6,6 +6,8 @@ import { useSelector } from "react-redux";
 import { RootState } from "../../store/store";
 import { useRouter, usePathname } from "next/navigation";
 import styles from "./header.module.css";
+import CloseIcon from "../icon/CloseIcon";
+import MenuIcon from "../icon/MenuIcon";
 /* import CartIcon from "../icon/CartIcon";
 import CloseIcon from "../icon/CloseIcon";
 import MenuIcon from "../icon/MenuIcon";
@@ -74,8 +76,8 @@ export default function Header() {
         </nav>
 
         {/* Right side */}
-        {/*         <div className={styles.right}>
-          <Link href="/cart" className={styles.cartBtn} aria-label="Kosár">
+              <div className={styles.right}>
+            {/*  <Link href="/cart" className={styles.cartBtn} aria-label="Kosár">
             <span className={styles.cartIconWrap}>
               <CartIcon />
               {totalQuantity > 0 && (
@@ -88,8 +90,7 @@ export default function Header() {
               )}
             </span>
             <span className={styles.cartText}>Kosár</span>
-          </Link>
-
+          </Link> */}
           <button
             className={styles.menuToggle}
             aria-label={open ? "Menü bezárása" : "Menü megnyitása"}
@@ -98,7 +99,7 @@ export default function Header() {
           >
             {open ? <CloseIcon /> : <MenuIcon />}
           </button>
-        </div> */}
+        </div> 
       </div>
 
       {/* Mobile sheet */}

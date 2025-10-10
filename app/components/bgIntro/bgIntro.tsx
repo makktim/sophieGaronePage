@@ -8,7 +8,7 @@ import Modal from "../modal/modal";
 import book from "../../../public/assets/extra.png";
 import stampPng from "../../../public/assets/stamp.png";
 import feathersJpg from "../../../public/assets/bg3.png";
-import { caveat } from "../../utils/fonts";
+import { dancing } from "../../utils/fonts";
 
 export default function BgIntro() {
   const intro = useSelector((state: RootState) => state.content.content.intro);
@@ -16,7 +16,7 @@ export default function BgIntro() {
 // const product = useSelector((state: RootState) => state.products.items);
 
   return (
-    <section id="intro" className={styles.intro}>
+    <section id="intro" className={`${styles.intro} ${dancing.variable}`}>
       {isOpen && <Modal />}
 
       <div className={styles.bgArt}>
@@ -33,11 +33,11 @@ export default function BgIntro() {
       <div className={styles.introMain}>
         <div className={styles.titleBox}></div>
 
-        <div className={`${styles.quoteWrap} ${caveat.className}`}>
-          <h1 className={styles.quoteLine}>{intro.title1}</h1>
-          <h1 className={styles.quoteLine}>{intro.title2}</h1>
-          <h1 className={styles.quoteLine}>{intro.title3}</h1>
-        </div>
+        <div className={styles.quoteWrap}>
+            <h1 className={styles.quoteLine}>{intro.title1}</h1>
+            <h1 className={styles.quoteLine}>{intro.title2}</h1>
+            <h1 className={styles.quoteLine}>{intro.title3}</h1>
+          </div>
 
         <div className={styles.buttonCtn}>
           <Link className={styles.bgButton} href="/firstChapter">
