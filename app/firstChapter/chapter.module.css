@@ -32,7 +32,7 @@
 }
 
 .book {
-  height: 500px;
+  height: clamp(500px, 70vh, 700px);
   max-height: 700px;
   overflow: hidden;
   padding-right: 0;
@@ -81,4 +81,45 @@
 .pageInfo {
   color: var(--paragraph);
   font-size: 14px;
+}
+
+@supports (height: 1svh) {
+  .book {
+    height: clamp(500px, 70svh, 700px);
+  }
+}
+
+@media (max-width: 900px) {
+  .readerWrap {
+    padding: 12px;
+  }
+
+  .book {
+    /* a rendelkezésre álló képernyő – a navigáció + padding levonva */
+    /* állítsd az 180–220px offsetet a saját header/footer méretedhez */
+    height: clamp(420px, calc(100svh - 180px), 720px);
+    max-height: none;
+    overflow: auto;                 /* ← görgethető, nem vág */
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* fallback, ha nincs svh támogatás */
+  @supports not (height: 1svh) {
+    .book {
+      height: clamp(420px, calc(100vh - 180px), 720px);
+    }
+  }
+
+  .pageContent {
+    /* kicsit nagyobb belső tér mobilon is oké, de a magasságot ne rontsa */
+    padding: clamp(16px, 4vw, 24px);
+    line-height: 1.7;               /* olvashatóbb mobilon */
+  }
+
+  .chapterNav {
+    position: sticky;
+    bottom: 0;                      /* mindig kéznél a lapozó */
+    background: transparent;
+    padding-top: 10px;
+  }
 }
