@@ -21,8 +21,8 @@ export default function ImageSlider() {
   const images = useMemo(
     () => [
       { src: image1, name: "Töki" },
-      { src: image2, name: "Ying-Yang" },
       { src: image3, name: "August" },
+      { src: image2, name: "Ying-Yang" },
       { src: image4, name: "Matt" },
       { src: image5, name: "Kyra" },
       { src: image6, name: "Reaven" },

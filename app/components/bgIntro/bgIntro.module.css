@@ -237,4 +237,8 @@
   .quoteWrap::after {
     display: none;
   }
+
+  .stampPng{
+    display: none;
+  }
 }

@@ -162,3 +162,76 @@
   border-radius: 12px;
   background-color: red;
 }
+
+/* általános: minden belső doboz férjen ki 100%-on */
+.card,
+.form,
+.sidebar,
+.input,
+.textarea {
+  box-sizing: border-box;
+}
+
+/* a szekció paddingje legyen rugalmas + safe-area barát */
+.section {
+  padding: clamp(16px, 4vw, 32px);
+  padding-left: max(16px, env(safe-area-inset-left));
+  padding-right: max(16px, env(safe-area-inset-right));
+}
+
+/* a cím ne legyen túl nagy kis nézetben */
+.heading {
+  font-size: clamp(28px, 8vw, 52px);
+}
+
+/* a kártya biztosan ne lógjon ki, és legyen rugalmas szélessége */
+.card {
+  width: min(100%, 800px);   /* 100% alatt, 800px felett korlátoz */
+  margin: 0 auto;
+}
+
+/* űrlapelemek teljes szélességűek */
+.input,
+.textarea {
+  width: 100%;
+}
+
+/* hosszú e-mail/URL ne tolja szélesre a sort */
+.link {
+  overflow-wrap: anywhere; /* v. break-word */
+  word-break: break-word;
+}
+
+/* Mobil finomhangolás */
+@media (max-width: 900px) {
+  .card {
+    grid-template-columns: 1fr;
+    overflow: visible; /* ne vágja le a magasabb tartalmat */
+  }
+  .form {
+    border-right: 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    padding: clamp(16px, 5vw, 24px);
+  }
+  .sidebar {
+    padding: clamp(16px, 5vw, 24px);
+  }
+  .actions {
+    margin-top: 6px;
+  }
+}
+
+/* extra kis mobilokra (≤360px széles) még óvatosabban */
+@media (max-width: 360px) {
+  .section {
+    padding-left: max(12px, env(safe-area-inset-left));
+    padding-right: max(12px, env(safe-area-inset-right));
+  }
+  .heading {
+    font-size: clamp(24px, 9vw, 36px);
+    margin-bottom: 16px;
+  }
+  .socials {
+    gap: 10px;
+  }
+}

@@ -86,7 +86,7 @@ export default function ContactForm() {
               className={styles.input}
               name="email"
               id="email"
-              placeholder="writersophiegarone@gmail.com"
+              placeholder="az email cím helye"
               value={formData.email}
               onChange={handleChange}
               autoComplete="email"
