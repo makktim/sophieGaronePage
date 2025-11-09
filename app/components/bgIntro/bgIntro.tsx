@@ -52,12 +52,12 @@ export default function BgIntro() {
           </Link>
           {/* Pecsét PNG – a gombok mögé, középre */}
         </div>
-        <Image
+{/*         <Image
           src={stampPng}
           alt="Várható megjelenés pecsét"
           className={styles.stampPng}
           priority
-        />
+        /> */}
         {/*         <p className={styles.description}>{intro.description}</p> */}
 
         <Image
