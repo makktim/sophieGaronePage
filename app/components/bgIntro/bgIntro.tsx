@@ -5,7 +5,7 @@ import Link from "next/link";
 import { RootState } from "@/app/store/store";
 import { useSelector } from "react-redux";
 import Modal from "../modal/modal";
-import book from "../../../public/assets/extra.png";
+import book from "../../../public/assets/borito_helyes.png";
 import feathersJpg from "../../../public/assets/bg3.png";
 import { dancing } from "../../utils/fonts";
 
