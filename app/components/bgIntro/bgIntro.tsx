@@ -6,7 +6,6 @@ import { RootState } from "@/app/store/store";
 import { useSelector } from "react-redux";
 import Modal from "../modal/modal";
 import book from "../../../public/assets/extra.png";
-import stampPng from "../../../public/assets/stamp.png";
 import feathersJpg from "../../../public/assets/bg3.png";
 import { dancing } from "../../utils/fonts";
 
