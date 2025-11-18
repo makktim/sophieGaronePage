@@ -123,3 +123,20 @@
     padding-top: 10px;
   }
 }
+
+.lightButton:hover {
+  background: linear-gradient(180deg, #183025 0%, #0b1a15 100%);
+  color: var(--paragraph);
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 6px 18px #183025;
+}
+
+.lightButton {
+  background: transparent;
+  color: var(--paragraph);
+  font-weight: 600;
+  padding: 12px 28px;
+  border-radius: 8px;
+  border: 2px solid;
+  margin-top: 24px;
+}

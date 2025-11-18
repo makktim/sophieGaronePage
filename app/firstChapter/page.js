@@ -1,5 +1,7 @@
 import styles from "./chapter.module.css";
 import PaginatedReader from "./PaginateReader.tsx";
+import Link from "next/link";
+
 
 const LOREM = `Az a rengeteg ember, aki a Földön él, vajon okkal született, céllal, vagy mindez tényleg csak a véletlen műve? Az emberek gyakran elgondolkodnak azon, vajon szerencsés véletlen, amikor egy cserép néhány centivel melléjük zuhan a járdán, vagy amikor hirtelen megállnak az út szélén, és az autó nem üti el őket. Olykor erős késztetést éreznek, hogy megtegyenek vagy kimondjanak valamit, amit nem is akarnak igazán. Máskor pedig épp az ellenkezőjét teszik: egy figyelmeztető hang azt suttogja belülről, hogy ne tegyék, ám ők mégsem engednek. Az igazság az, hogy ezek egyike sem véletlen. Ezek a hangok, késztetések a mi sugallataink. Mi, őrangyalok, a Menny harcosai, láthatatlan árnyékként követjük a ránk bízott személyeket. A jelenlétünk nem mindenki mellett állandó. Akad, akit folyamatosan őrzünk. Mások életében csak időszakos vendégek vagyunk. Azért, mert odafent így rendelik el. Egyesek újoncok a szolgálatban, mások évezredek óta védelmezik a halandókat. Minden sors egy nagyobb terv része, és a mi  feladatunk annak biztosítása, hogy védenceink végigjárják az utat, ami meg van írva számukra. Minden összefügg mindennel, még ha az emberek nem is látják a teljes képet. És ott van a szabad akarat is – az a fránya kiskapu, ami lehetőséget ad nekik, hogy saját döntéseket hozzanak. Néha viszont éppen ezzel okoznak nekünk komoly fejfájást.  Ezért figyeltem a védencemet, San Francisco egy kis kávézójának hátsó sarkában. Az asztalokat gyertyafényes lámpák díszítették 
 – bár a verőfényes délután során éppen nem világítottak –, mellettük üvegvázában álltak a friss tulipánok. A falakon régi fényképek idézték a kávézó múltját, a közösség emlékeit, miközben a kényelmes székek és kanapék a nyugodt olvasást és beszélgetéseket biztosítják. Én az egyik boksz kanapéján heverésztem, fekete bakancsos lábam az előttem lévő szék támláján pihent. A lábamra simuló kék farmerban, bézs trikóban és fekete bőrdzsekiben könnyedén beleolvadhatnék a tömegbe, ha azt akarnám, hogy meglássanak. De én most megfigyelek. Láthatatlanul felmérem a terepet. Ha valaki ide ülne, ahol vagyok, nem érezne semmi változást. Néhány vendég mellett ott állt a hozzájuk rendelt őrangyal. Amikor észrevettek, egyszerűen csak felém bólintottak, majd visszafordultak a védencükhöz. Ez a világ rendje. Mi csendes megfigyelők vagyunk, és többnyire azok is maradunk. Azon töprengek, vajon hová tűntek az emberek közötti, órákig tartó beszélgetések. Egyre többen merülnek a telefonjukba, még egy mosolyt sem ejtve a pultos felé. 
@@ -69,6 +71,12 @@ export default function FirstChapterPage() {
         <h1 className={styles.title}>Az első fejezet</h1>
 
         <PaginatedReader text={LOREM} storageKey="chapter-1-page" />
+                  <Link
+                    className={styles.lightButton}
+                    href={"https://alomgyar.hu/konyv/eg-es-fold-kozott"}
+                  >
+                    Megrendelés
+                  </Link>
       </div>
     </div>
   );

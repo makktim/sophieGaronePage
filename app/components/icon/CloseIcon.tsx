@@ -10,8 +10,8 @@ const CloseIcon = ({
 }: CloseIconProps) => (
   <svg
     viewBox="0 0 24 24"
-    stroke-width="2.2"
-    stroke-linecap="round"
+    strokeWidth="2.2"
+    strokeLinecap="round"
     width={size}
     height={size}
     fill={color}
