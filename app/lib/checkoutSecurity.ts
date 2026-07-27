@@ -106,7 +106,12 @@ export function validateCheckoutOrigin(req: Request): boolean {
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_APP_URL;
   if (siteUrl) {
     try {
-      allowed.add(new URL(siteUrl).origin);
+      const parsed = new URL(siteUrl);
+      allowed.add(parsed.origin);
+      // Accept both www and apex hostnames for the configured site.
+      const host = parsed.hostname.replace(/^www\./, "");
+      allowed.add(`${parsed.protocol}//${host}`);
+      allowed.add(`${parsed.protocol}//www.${host}`);
     } catch {
       // ignore invalid env URL
     }

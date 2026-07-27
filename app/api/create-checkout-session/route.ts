@@ -385,7 +385,9 @@ export async function POST(req: Request) {
 
     const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: "2025-08-27.basil" });
     const stripeLineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = [];
-    let hufScale = 1;
+    // This Stripe account stores HUF amounts as forints × 100 (e.g. 6000 Ft → 600000).
+    // Default to 100 so price_data (shipping / products without stripePriceId) matches.
+    let hufScale: 1 | 100 = 100;
 
     for (const line of lines) {
       const product = byId.get(line.productId);
@@ -397,11 +399,12 @@ export async function POST(req: Request) {
             if (dbUnit > 0) {
               const ratio = pr.unit_amount / dbUnit;
               if (Math.abs(ratio - 100) < 0.5) hufScale = 100;
+              else if (Math.abs(ratio - 1) < 0.5) hufScale = 1;
             }
           }
           break;
         } catch {
-          // ignore lookup errors, fallback remains 1
+          // Restricted keys may lack Prices Read — keep the ×100 default.
         }
       }
     }
@@ -485,9 +488,16 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ id: session.id, url: session.url }, { status: 200 });
   } catch (err) {
-    const message =
+    const raw =
       err instanceof Error ? err.message : "Ismeretlen hiba a fizetési session létrehozásakor.";
-    const status = /raktáron|kosár|ÁSZF|Érvénytelen|Hiányos|csomagautomat|függőben/i.test(message)
+    const message = /total amount due must add up to at least/i.test(raw)
+      ? "A fizetendő összeg túl alacsony a kártyás fizetéshez. Próbáld meg szállítással, vagy válassz másik terméket."
+      : /more_permissions_required|Permission denied/i.test(raw)
+      ? "A Stripe kulcsnak nincs meg a szükséges jogosultsága (Checkout / Prices). Ellenőrizd a live secret keyt."
+      : raw;
+    const status = /raktáron|kosár|ÁSZF|Érvénytelen|Hiányos|csomagautomat|függőben|túl alacsony/i.test(
+      message
+    )
       ? 400
       : 500;
     console.error("create-checkout-session error:", message, err);
