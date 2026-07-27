@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "../../store/store";
@@ -8,17 +9,25 @@ import { useRouter, usePathname } from "next/navigation";
 import styles from "./header.module.css";
 import CloseIcon from "../icon/CloseIcon";
 import MenuIcon from "../icon/MenuIcon";
-/* import CartIcon from "../icon/CartIcon";
-import CloseIcon from "../icon/CloseIcon";
-import MenuIcon from "../icon/MenuIcon";
- */
+import CartIcon from "../icon/CartIcon";
+import logo from "../../../public/assets/logo.png";
+
+type MenuItem = {
+  value: string;
+  link: string;
+  children?: MenuItem[];
+};
+
+function hasChildren(item: MenuItem): item is MenuItem & { children: MenuItem[] } {
+  return Array.isArray(item.children) && item.children.length > 0;
+}
+
 export default function Header() {
   const { menuitem } = useSelector(
     (state: RootState) => state.content.content.Header
   );
-  /*   const totalQuantity = useSelector(
-    (state: RootState) => state.cart.items[0]?.quantity || 0
-  ); */
+  const cartItems = useSelector((state: RootState) => state.cart.items);
+  const cartCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
   const [open, setOpen] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
@@ -46,51 +55,140 @@ export default function Header() {
     }
     setOpen(false);
   };
+
+  const renderDesktopNavItem = (item: MenuItem) => {
+    if (hasChildren(item)) {
+      return (
+        <li key={item.value} className={styles.navDropdown}>
+          <button
+            type="button"
+            className={styles.navLink}
+            aria-haspopup="true"
+            aria-expanded="false"
+          >
+            {item.value}
+          </button>
+          <ul className={styles.dropdownMenu} role="menu">
+            {item.children.map((child) => (
+              <li key={child.value} role="none">
+                <Link
+                  href={child.link}
+                  className={styles.dropdownLink}
+                  role="menuitem"
+                >
+                  {child.value}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </li>
+      );
+    }
+
+    if (item.link === "/contact") {
+      return (
+        <li key={item.value}>
+          <button
+            type="button"
+            className={styles.navLink}
+            onClick={() => onNavClick("#contact")}
+          >
+            {item.value}
+          </button>
+        </li>
+      );
+    }
+
+    return (
+      <li key={item.value}>
+        <Link href={item.link} className={styles.navLink}>
+          {item.value}
+        </Link>
+      </li>
+    );
+  };
+
+  const renderMobileNavItem = (item: MenuItem) => {
+    if (hasChildren(item)) {
+      return (
+        <li key={item.value} className={styles.mobileDropdownGroup}>
+          <span className={styles.mobileDropdownLabel}>{item.value}</span>
+          <ul className={styles.mobileDropdownList}>
+            {item.children.map((child) => (
+              <li key={child.value}>
+                <Link
+                  href={child.link}
+                  className={styles.mobileDropdownLink}
+                  onClick={() => setOpen(false)}
+                >
+                  {child.value}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </li>
+      );
+    }
+
+    if (item.link === "/contact") {
+      return (
+        <li key={item.value}>
+          <button
+            className={styles.mobileLinkButton}
+            onClick={() => onNavClick(item.link)}
+          >
+            {item.value}
+          </button>
+        </li>
+      );
+    }
+
+    return (
+      <li key={item.value}>
+        <Link
+          href={item.link}
+          className={styles.mobileLink}
+          onClick={() => setOpen(false)}
+        >
+          {item.value}
+        </Link>
+      </li>
+    );
+  };
+
   return (
     <header className={styles.header}>
       <div className={styles.inner}>
-        <Link href="/" className={styles.brand}>
-          Sophie Garone
+        <Link href="/" className={styles.brand} aria-label="Sophie Garone főoldal">
+          <Image
+            src={logo}
+            alt="Sophie Garone"
+            className={styles.brandLogo}
+            priority
+          />
         </Link>
 
         <nav className={styles.nav} aria-label="Fő navigáció">
           <ul className={styles.navList}>
-            {menuitem.map((item) => (
-              <li key={item.value}>
-                {item.link === "/contact" ? (
-                  <button
-                    type="button"
-                    className={styles.navLink}
-                    onClick={() => onNavClick("#contact")}
-                  >
-                    {item.value}
-                  </button>
-                ) : (
-                  <Link href={item.link} className={styles.navLink}>
-                    {item.value}
-                  </Link>
-                )}
-              </li>
-            ))}
+            {menuitem.map((item) => renderDesktopNavItem(item))}
           </ul>
         </nav>
 
-        {/* Right side */}
-              <div className={styles.right}>
-            {/*  <Link href="/cart" className={styles.cartBtn} aria-label="Kosár">
+        <div className={styles.right}>
+          <Link href="/cart" className={styles.cartBtn} aria-label="Kosár">
             <span className={styles.cartIconWrap}>
               <CartIcon />
-              {totalQuantity > 0 && (
+              {cartCount > 0 && (
                 <span
                   className={styles.badge}
-                  aria-label={`${totalQuantity} tétel a kosárban`}
+                  aria-label={`${cartCount} tétel a kosárban`}
                 >
-                  {totalQuantity}
+                  {cartCount}
                 </span>
               )}
             </span>
             <span className={styles.cartText}>Kosár</span>
-          </Link> */}
+          </Link>
           <button
             className={styles.menuToggle}
             aria-label={open ? "Menü bezárása" : "Menü megnyitása"}
@@ -99,10 +197,9 @@ export default function Header() {
           >
             {open ? <CloseIcon /> : <MenuIcon />}
           </button>
-        </div> 
+        </div>
       </div>
 
-      {/* Mobile sheet */}
       {open && (
         <div
           className={styles.mobileSheet}
@@ -110,26 +207,16 @@ export default function Header() {
           aria-label="Mobil menü"
         >
           <ul className={styles.mobileList}>
-            {menuitem.map((item) => (
-              <li key={item.value}>
-                {item.link === "/contact" ? (
-                  <button
-                    className={styles.mobileLinkButton}
-                    onClick={() => onNavClick(item.link)}
-                  >
-                    {item.value}
-                  </button>
-                ) : (
-                  <Link
-                    href={item.link}
-                    className={styles.mobileLink}
-                    onClick={() => setOpen(false)}
-                  >
-                    {item.value}
-                  </Link>
-                )}
-              </li>
-            ))}
+            {menuitem.map((item) => renderMobileNavItem(item))}
+            <li>
+              <Link
+                href="/cart"
+                className={styles.mobileLink}
+                onClick={() => setOpen(false)}
+              >
+                Kosár {cartCount > 0 ? `(${cartCount})` : ""}
+              </Link>
+            </li>
           </ul>
         </div>
       )}

@@ -2,6 +2,7 @@ import Image from "next/image";
 import styles from "./about.module.css";
 import book1 from "../../public/assets/sampl01.png";
 import book2 from "../../public/assets/extra.png";
+import bookFelhok from "../../public/assets/shop/ff.png";
 
 export default function AboutPage() {
   return (
@@ -9,11 +10,15 @@ export default function AboutPage() {
       <div className={styles.introMain}>
         <div className={styles.image}>
           <Image
-            aria-hidden
             src={book1}
-            alt="File icon"
+            alt="Sophie Garone"
             height={500}
-            objectFit="contain"
+            style={{
+              objectFit: "contain",
+              width: "auto",
+              height: "auto",
+              maxHeight: 500,
+            }}
           />
         </div>
         <div className={styles.title}>
@@ -81,14 +86,64 @@ export default function AboutPage() {
         </div>
         <div className={styles.image}>
           <Image
-            aria-hidden
             src={book2}
-            alt="File icon"
+            alt="Ég és föld között"
             width={500}
             height={500}
           />
         </div>
       </div>
+
+      <div className={styles.introMain}>
+        <div className={styles.image}>
+          <Image
+            src={bookFelhok}
+            alt="A felhők felett"
+            width={500}
+            height={500}
+            style={{
+              objectFit: "contain",
+              width: "auto",
+              height: "auto",
+              maxHeight: 500,
+            }}
+          />
+        </div>
+        <div className={styles.title}>
+          <h3 className={styles.title}>A felhők felett</h3>
+          <p className={styles.paragraph}>
+            A felhők felett egy történet hűségről, önfeláldozásról és egy
+            pusztító háborúról, ahol a legnagyobb harcot nem az ellenséggel,
+            hanem saját magunkkal vívjuk.
+          </p>
+          <h3>SZÖVETSÉG. HÁBORÚ</h3>
+          <p className={styles.paragraph}>
+            Kyra végre megtalálta azt, amiért érdemes élni, és meglelte társát,
+            Matt, azaz Solan, az isteni örökös oldalán. Ám a sors nem ad nekik
+            időt a megnyugvásra — újabb, könyörtelen próbatétel elé állítja
+            őket.
+          </p>
+          <p className={styles.paragraph}>
+            Kyra és maroknyi, elszánt csapatuk harcba indul a démonok ellen,
+            hogy megtisztítsák a Földet. Arra azonban sem számítanak, hogy egy
+            régóta tervezett háború kellős közepébe csöppennek. Miközben a világ
+            lángba borul körülöttük, Kyra egy újabb, minden eddiginél nehezebb
+            igazsággal kénytelen szembenézni. Nem elég felépíteni egy új életet,
+            meg is kell tudni védeni azt. De mi marad belőlük, ha a csaták
+            tüzében végül már magukra sem ismernek?
+          </p>
+          <p className={styles.paragraph}>
+            A felhők felett az Ég és föld között feszült, sötét és érzelmekkel
+            teli folytatása. Egy történet a hűségről, az önfeláldozásról és egy
+            szerelemről, amelynek a saját sötétségével is meg kell küzdenie.
+          </p>
+          <p className={styles.paragraph}>
+            A legnagyobb csatát az ellen vívjuk, amivé válnunk kell egy
+            háborúban a túlélésért.
+          </p>
+        </div>
+      </div>
+
       <div className={styles.contact}>
         <h4 className={styles.paragraph}>
           Ha szeretnél értesülni a könyvmegjelenésekről és exkluzív

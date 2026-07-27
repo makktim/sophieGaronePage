@@ -12,7 +12,19 @@ import {
 import styles from "./cart.module.css";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import bg3 from "@/public/assets/extra.png";
+import {
+  getShopProductDetail,
+  resolveProductImageSrc,
+} from "@/app/lib/shopProduct";
+
+function cartItemImageSrc(item: {
+  id: string;
+  imageSrc?: string;
+}): string {
+  if (item.imageSrc) return resolveProductImageSrc(item.imageSrc);
+  const catalog = getShopProductDetail(item.id);
+  return resolveProductImageSrc(catalog?.imageSrc);
+}
 
 export default function ShoppingCart() {
   const dispatch = useDispatch();
@@ -67,13 +79,12 @@ export default function ShoppingCart() {
         </div>
       ) : (
         <div className={styles.grid}>
-          {/* Tétellista */}
           <section className={styles.items}>
             {cartItems.map((item) => (
               <article key={item.id} className={styles.card}>
                 <div className={styles.thumb}>
                   <Image
-                    src={bg3}
+                    src={cartItemImageSrc(item)}
                     alt={`${item.name} borító`}
                     fill
                     className={styles.thumbImg}
@@ -155,7 +166,6 @@ export default function ShoppingCart() {
             </button>
           </section>
 
-          {/* Összegzés */}
           <aside className={styles.summary}>
             <div className={styles.sumCard}>
               <h2 className={styles.sumTitle}>Összegzés</h2>
@@ -183,7 +193,6 @@ export default function ShoppingCart() {
         </div>
       )}
 
-      {/* Mobil ragadós checkout */}
       {cartItems.length > 0 && (
         <div className={styles.stickyBar}>
           <span className={styles.stickyPrice}>{priceLabel}</span>

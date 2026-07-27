@@ -6,12 +6,7 @@
   margin: 0 auto;
   padding: 2.5rem 1.25rem;
   color: var(--foreground);
-  background: linear-gradient(
-    180deg,
-    var(--aszf-bg),
-    #0a0d0e 60%,
-    var(--aszf-bg)
-  );
+  background: transparent;
 }
 
 /* Címek és meta */
@@ -66,7 +61,7 @@
 /* Táblázat – a megadott zöldes gradienssel */
 .tableWrap {
   overflow-x: auto;
-  background: linear-gradient(180deg, #183025 0%, #0b1a15 100%);
+  background: var(--btn-gradient);
   border: 1px solid var(--foreground);
   border-radius: 12px;
 }
@@ -106,7 +101,7 @@
 .main code {
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono",
     monospace;
-  background: #0b1a15;
+  background: var(--slate-deep);
   border: 1px solid var(--foreground);
   padding: 0.05rem 0.35rem;
   border-radius: 6px;

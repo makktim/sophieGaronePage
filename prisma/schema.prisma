@@ -35,6 +35,7 @@ model Order {
   shippingMethod   String
   pickupPointId    String
   shippingParcelId String?      // ← ajánlott: opcionális
+  confirmationEmailSentAt DateTime?
 
   billing          Json
   shipping         Json

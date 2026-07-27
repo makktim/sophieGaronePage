@@ -1,25 +1,39 @@
 @import url("https://fonts.googleapis.com/css2?family=Gloock:wght@600&family=Vollkorn:wght@400;500&display=swap");
 
 :root {
-  --background: #2e3330;
-  --backgroundLight: #1f6030;
+  /* Deep slate / charcoal palette */
+  --slate-glow: #252e3f;
+  --slate-mid: #232c3d;
+  --slate-base: #1a202c;
+  --slate-edge: #0f131a;
+  --slate-deep: #0d1117;
+
+  --background: #1a202c;
+  --backgroundLight: #2f3a4f;
   --foreground: #f0ede6;
   --paragraph: #f0ede6;
-  --text: #d9d9d9;
-  --darkBackground: #374151d9;
-  /* zöld surface skála – egységes a többi szekcióval */
-  --surface-700: #12261d;
-  --surface-800: #0e1e17;
-  --surface-900: #0a1612;
+  --text: #f0ede6;
+  --darkBackground: rgba(15, 19, 26, 0.85);
 
-  --text: #f0ede6; /* címek/felirat */
+  --surface-700: #252e3f;
+  --surface-800: #1a202c;
+  --surface-900: #0d1117;
+
+  --aszf-bg: transparent;
+
   --muted: rgba(240, 237, 230, 0.72);
   --muted-2: rgba(240, 237, 230, 0.56);
   --ring: rgba(240, 237, 230, 0.08);
-  /*   --backgroundLight: #1f6030;
-    --foreground: #2fa15b; */
+
+  --btn-gradient: linear-gradient(180deg, #252e3f 0%, #1a202c 100%);
+  --btn-shadow: 0 4px 16px rgba(15, 19, 26, 0.45);
+  --btn-shadow-hover: 0 6px 18px rgba(15, 19, 26, 0.55);
+  --card-overlay: rgba(26, 32, 44, 0.72);
+  --accent: #c5a880;
+
   --headingFont: "Gloock", serif;
   --bodyFont: "Vollkorn", serif;
+  --header-height: 60px;
 }
 
 h1,
@@ -50,18 +64,23 @@ body {
   overflow-x: hidden;
 }
 
-/*     linear-gradient(180deg, #0e0e0f, #183025); */
-
 body {
   color: var(--foreground);
-  background: radial-gradient(
-      800px 420px at 50% 0%,
-      #0e0e0f 0%,
-      transparent 60%
-    ),
-    linear-gradient(#0e1e17, #12261d);
+  background-color: var(--slate-deep);
+  background-image: radial-gradient(
+    ellipse 95% 85% at 50% 38%,
+    #252e3f 0%,
+    #232c3d 18%,
+    #1a202c 42%,
+    #141a24 68%,
+    #0f131a 88%,
+    #0d1117 100%
+  );
+  background-attachment: fixed;
+  min-height: 100vh;
 
   margin: auto;
+  padding-top: var(--header-height);
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 }
 

@@ -1,28 +1,27 @@
-// app/_components/CartPersistence.tsx
 "use client";
 
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { replaceCart } from "@/app/store/slices/cartSlice";
-import { loadCart } from "@/app/store/cartStorage";
+import { clearCartStorage, loadCart, saveCart } from "@/app/store/cartStorage";
 import { RootState } from "../store/store";
 
 export default function CartPersistence() {
   const dispatch = useDispatch();
   const cart = useSelector((s: RootState) => s.cart);
 
-  // 1) betöltés első render után (SSR-safe)
   useEffect(() => {
     const cached = loadCart();
     if (cached) dispatch(replaceCart(cached));
   }, [dispatch]);
 
-  // 2) mentés: kis „debounce”, hogy ne írjunk túl sűrűn
   useEffect(() => {
-    const id = setTimeout(() => {
-     // if (cart) saveCart(cart);
-    }, 150);
-    return () => clearTimeout(id);
+    if (typeof window === "undefined") return;
+    if (cart.items.length === 0) {
+      clearCartStorage();
+      return;
+    }
+    saveCart({ ...cart, updatedAt: Date.now() });
   }, [cart]);
 
   return null;

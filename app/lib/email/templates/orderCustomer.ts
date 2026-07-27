@@ -1,5 +1,11 @@
 // app/lib/email/templates/orderCustomer.ts
 
+import {
+  formatBankTransferInstructions,
+  getBankTransferDetails,
+  isTransferPayment,
+} from "@/app/lib/bankTransfer";
+
 // ===== Types =====
 type LineItem = {
   description: string | null;
@@ -9,6 +15,8 @@ type LineItem = {
 
 type Address = {
   name?: string;
+  email?: string;
+  phone?: string;
   address?: string;
   city?: string;
   zip?: string;
@@ -32,10 +40,11 @@ type Totals = {
 export type OrderEmailInput = {
   id: string;
   createdAt?: string; // ISO
-  amount_total: number; // HUF-ban (major unit, de Stripe néha ×100-at ad)
+  /** Order total in whole forints unless amountScale is 100. */
+  amount_total: number;
   currency: string; // pl. "HUF"
-  payment_status?: string; // "paid" | "cod" | "succeeded" | ...
-  payment_label?: string; // magyar felirat: "Bankkártya (Stripe)" | "Utánvét"
+  payment_status?: string; // "paid" | "cod" | "transfer" | "succeeded" | ...
+  payment_label?: string; // magyar felirat: "Bankkártya (Stripe)" | "Utánvét" | "Átutalás"
   customer_email: string;
   customer_name?: string;
 
@@ -56,6 +65,13 @@ export type OrderEmailInput = {
 
   orderUrl?: string;
   orderNo?: string;
+
+  /**
+   * How monetary fields are encoded.
+   * - 1 (default): whole forints from our DB / order records
+   * - 100: Stripe-style HUF amounts stored as forints × 100
+   */
+  amountScale?: 1 | 100;
 };
 
 export type Brand = {
@@ -73,35 +89,32 @@ function shortId(id: string) {
   return (id || "").slice(-8).toUpperCase();
 }
 
-const ZERO_DECIMAL = new Set(["HUF", "JPY", "KRW"]);
 const CURRENCY_LOCALE: Record<string, string> = { HUF: "hu-HU" };
 
-function normalizeAmount(amount?: number | null, currency = "HUF") {
-  const n = Number(amount);
-  if (!Number.isFinite(n)) return 0;
-  const cur = (currency || "HUF").toUpperCase();
-
-  // Zero-decimal (HUF, JPY, KRW) – Stripe néha minor unitban küld (×100).
-  // Osztunk 100-zal, ha kerek száz és "elég nagy", hogy skálázott legyen.
-  if (ZERO_DECIMAL.has(cur)) {
-    if (n % 100 === 0 && n >= 10_000) {
-      // 99 000 -> 990; 189 000 -> 1 890; 629 000 -> 6 290
-      return Math.round(n / 100);
-    }
-  }
-  return n;
+function resolveAmountScale(scale?: 1 | 100): 1 | 100 {
+  return scale === 100 ? 100 : 1;
 }
 
-function money(amount?: number | null, currency = "HUF") {
+/** Convert stored amount to whole forints for display. */
+function toMajorAmount(
+  amount?: number | null,
+  scale: 1 | 100 = 1
+): number {
+  const n = Number(amount);
+  if (!Number.isFinite(n)) return 0;
+  return scale === 100 ? Math.round(n / 100) : Math.round(n);
+}
+
+function formatMoney(amountMajor: number, currency = "HUF") {
   const locale = CURRENCY_LOCALE[currency] || "hu-HU";
-  const safe = normalizeAmount(amount, currency);
   try {
     return new Intl.NumberFormat(locale, {
       style: "currency",
       currency,
-    }).format(safe);
+      maximumFractionDigits: 0,
+    }).format(amountMajor);
   } catch {
-    return `${Math.round(safe)} ${currency}`;
+    return `${Math.round(amountMajor)} ${currency}`;
   }
 }
 
@@ -128,18 +141,75 @@ function shipMethodLabel(key?: string) {
   }
 }
 
+function pickupPointDisplay(order: OrderEmailInput): {
+  name: string;
+  address: string;
+  label: string;
+} | null {
+  if (order.pickupPointLabel?.trim()) {
+    const label = order.pickupPointLabel.trim();
+    return {
+      name: order.pickupPoint?.name?.trim() || label,
+      address: order.pickupPoint?.address?.trim() || "",
+      label,
+    };
+  }
+  const name = order.pickupPoint?.name?.trim() || "";
+  const address = order.pickupPoint?.address?.trim() || "";
+  if (!name && !address) return null;
+  return {
+    name,
+    address,
+    label: [name, address].filter(Boolean).join(" — "),
+  };
+}
+
+/** Shipping method label, including Foxpost terminal name when available. */
+function formatShippingMethodText(order: OrderEmailInput, methodKey?: string) {
+  const base = shipMethodLabel(methodKey || order.shippingMethod);
+  const pickup = pickupPointDisplay(order);
+  if (
+    (methodKey === "foxpost_locker" ||
+      order.shippingMethod === "foxpost_locker" ||
+      !!order.pickupPoint) &&
+    pickup?.name
+  ) {
+    return `${base} – ${pickup.name}`;
+  }
+  return base;
+}
+
+function resolveCustomerPhone(order: OrderEmailInput): string {
+  return (
+    order.shipping?.phone ||
+    order.billing?.phone ||
+    ""
+  ).trim();
+}
+
+function formatAddressBlock(addr?: Address | null): string {
+  if (!addr) return `<span class="muted">—</span>`;
+  const lines = [
+    addr.name,
+    addr.address,
+    [addr.zip, addr.city].filter(Boolean).join(" "),
+    addr.country || "Magyarország",
+  ].filter(Boolean);
+  return lines.map((line) => esc(line)).join("<br>");
+}
+
 function isShippingItem(li: LineItem) {
   return (li?.description || "").toLowerCase().includes("szállítás");
 }
 
 function sumLineItems(
   items: LineItem[] | undefined,
-  currency: string,
+  scale: 1 | 100,
   filter?: (li: LineItem) => boolean
 ) {
   const list = (items || []).filter((li) => (filter ? filter(li) : true));
   return list.reduce(
-    (acc, li) => acc + normalizeAmount(li.amount_total, currency),
+    (acc, li) => acc + toMajorAmount(li.amount_total, scale),
     0
   );
 }
@@ -147,9 +217,18 @@ function sumLineItems(
 function paymentLabel(order: OrderEmailInput) {
   if (order.payment_label) return order.payment_label;
   const s = (order.payment_status || "").toLowerCase();
+  if (s === "transfer" || s === "bank_transfer") return "Átutalás";
   if (s === "cod") return "Utánvét";
   if (s === "paid" || s === "succeeded") return "Bankkártya (Stripe)";
   return s || "-";
+}
+
+function transferInstructionsBlock(order: OrderEmailInput, orderNo: string) {
+  if (!isTransferPayment(order)) return { textExtra: [] as string[], htmlExtra: "" };
+  const details = getBankTransferDetails();
+  if (!details) return { textExtra: [] as string[], htmlExtra: "" };
+  const { textLines, htmlBlock } = formatBankTransferInstructions(orderNo, details);
+  return { textExtra: ["", ...textLines], htmlExtra: htmlBlock };
 }
 
 // ===== Renderer =====
@@ -157,16 +236,16 @@ export function renderCustomerEmail(order: OrderEmailInput, brand: Brand) {
   const orderNo = order.orderNo || shortId(order.id);
   const prefix =
     process.env.ORDER_EMAIL_SUBJECT_PREFIX || "Rendelés visszaigazolás";
+  const scale = resolveAmountScale(order.amountScale);
+  // `money` formats amounts that are already in whole forints.
+  const money = (amountMajor?: number | null) =>
+    formatMoney(Math.round(Number(amountMajor) || 0), order.currency);
 
   // --- Normalizált összegek (ha nincs totals, tételekből számol) ---
-  const liShipping = sumLineItems(
-    order.line_items,
-    order.currency,
-    isShippingItem
-  );
+  const liShipping = sumLineItems(order.line_items, scale, isShippingItem);
   const liGoods = sumLineItems(
     order.line_items,
-    order.currency,
+    scale,
     (li) => !isShippingItem(li)
   );
 
@@ -176,18 +255,14 @@ export function renderCustomerEmail(order: OrderEmailInput, brand: Brand) {
   const rawTotal = order.totals?.total ?? order.amount_total;
 
   const subtotal =
-    rawSubtotal != null
-      ? normalizeAmount(rawSubtotal, order.currency)
-      : liGoods;
+    rawSubtotal != null ? toMajorAmount(rawSubtotal, scale) : liGoods;
 
   const shipping =
-    rawShipping != null
-      ? normalizeAmount(rawShipping, order.currency)
-      : liShipping;
+    rawShipping != null ? toMajorAmount(rawShipping, scale) : liShipping;
 
-  const discount = normalizeAmount(rawDiscount, order.currency);
+  const discount = toMajorAmount(rawDiscount, scale);
   const computedTotal = Math.max(0, subtotal + shipping - discount);
-  const normalizedRawTotal = normalizeAmount(rawTotal, order.currency);
+  const normalizedRawTotal = toMajorAmount(rawTotal, scale);
   const total =
     Math.abs(normalizedRawTotal - computedTotal) <= 5
       ? normalizedRawTotal
@@ -208,7 +283,16 @@ export function renderCustomerEmail(order: OrderEmailInput, brand: Brand) {
     ? "pickup"
     : undefined;
 
-  const methodText = shipMethodLabel(methodKey);
+  const methodText = formatShippingMethodText(order, methodKey);
+  const pickup = pickupPointDisplay(order);
+  const customerPhone = resolveCustomerPhone(order);
+  const customerEmail = order.customer_email || order.billing?.email || order.shipping?.email || "";
+  const customerName =
+    order.customer_name ||
+    order.shipping?.name ||
+    order.billing?.name ||
+    "";
+  const transferBlock = transferInstructionsBlock(order, orderNo);
 
   // Házhozszállításnál, ha nincs külön shipping cím, essünk vissza billingre
   const shippingAddr: Address | null =
@@ -232,36 +316,42 @@ export function renderCustomerEmail(order: OrderEmailInput, brand: Brand) {
       ? `Dátum: ${new Date(order.createdAt).toLocaleString("hu-HU")}`
       : ``,
     `Fizetési mód: ${paymentLabel(order)}`,
+    ...transferBlock.textExtra,
+    ``,
+    `Vásárló adatai:`,
+    customerName ? `Név: ${customerName}` : ``,
+    customerEmail ? `E-mail: ${customerEmail}` : ``,
+    customerPhone ? `Telefon: ${customerPhone}` : ``,
     ``,
     `Tételek:`,
     ...(order.line_items || []).map(
       (li) => `• ${li.quantity || 1} × ${li.description || ""}`
     ),
     ``,
-    `Részösszeg: ${money(subtotal, order.currency)}`,
-    `Szállítás: ${money(shipping, order.currency)}`,
-    discount ? `Kedvezmény: -${money(discount, order.currency)}` : ``,
-    `Végösszeg: ${money(total, order.currency)}`,
+    `Részösszeg: ${money(subtotal)}`,
+    `Szállítás: ${money(shipping)}`,
+    discount ? `Kedvezmény: -${money(discount)}` : ``,
+    `Végösszeg: ${money(total)}`,
     ``,
     `Szállítási mód: ${methodText}`,
-    isLocker
-      ? order.pickupPointLabel
-        ? `Átvevőpont: ${order.pickupPointLabel}`
-        : order.pickupPoint?.name
-        ? `Átvevőpont: ${order.pickupPoint.name} – ${
-            order.pickupPoint.address || ""
-          }`
-        : ``
+    isLocker && pickup
+      ? `Foxpost automata neve: ${pickup.name}${
+          pickup.address ? ` (${pickup.address})` : ""
+        }`
       : ``,
     shippingAddr
       ? `Szállítási cím: ${shippingAddr.name || ""}, ${
           shippingAddr.zip || ""
-        } ${shippingAddr.city || ""}, ${shippingAddr.address || ""}`
+        } ${shippingAddr.city || ""}, ${shippingAddr.address || ""}${
+          shippingAddr.phone ? `, Tel: ${shippingAddr.phone}` : ""
+        }`
       : ``,
     order.billing
       ? `Számlázási cím: ${order.billing.name || ""}, ${
           order.billing.zip || ""
-        } ${order.billing.city || ""}, ${order.billing.address || ""}`
+        } ${order.billing.city || ""}, ${order.billing.address || ""}${
+          order.billing.phone ? `, Tel: ${order.billing.phone}` : ""
+        }${order.billing.email ? `, E-mail: ${order.billing.email}` : ""}`
       : ``,
     order.note ? `Megjegyzés: ${order.note}` : ``,
     ``,
@@ -332,6 +422,7 @@ export function renderCustomerEmail(order: OrderEmailInput, brand: Brand) {
             : ``
         }
         <div class="muted">Fizetési mód: ${esc(paymentLabel(order))}</div>
+        ${transferBlock.htmlExtra}
       </td></tr>
 
       <tr><td class="card">
@@ -350,27 +441,27 @@ export function renderCustomerEmail(order: OrderEmailInput, brand: Brand) {
       const isShip = isShippingItem(li);
       const qty = isShip ? 1 : li.quantity || 1;
 
-      // Szállítás TOTAL: a totals.shipping az igazság; ha nincs, esünk vissza a li.amount_total-ra (normálva)
+      // Szállítás TOTAL: a totals.shipping az igazság; ha nincs, esünk vissza a li.amount_total-ra
       const totalLi = isShip
-        ? normalizeAmount(
+        ? toMajorAmount(
             order.totals?.shipping ?? li.amount_total,
-            order.currency
+            scale
           )
-        : normalizeAmount(li.amount_total, order.currency);
+        : toMajorAmount(li.amount_total, scale);
 
       const unit = qty ? Math.round(totalLi / qty) : totalLi;
 
       // Szállítás leírás: label a shippingMethod alapján (szebb, mint egyszerű "Szállítás")
       const desc = isShip
-        ? shipMethodLabel(order.shippingMethod)
+        ? formatShippingMethodText(order, order.shippingMethod)
         : li.description || "";
 
       return `
           <tr>
             <td>${esc(desc)}</td>
             <td class="right">${qty}</td>
-            <td class="right hide-sm">${money(unit, order.currency)}</td>
-            <td class="right">${money(totalLi, order.currency)}</td>
+            <td class="right hide-sm">${money(unit)}</td>
+            <td class="right">${money(totalLi)}</td>
           </tr>`;
     })
     .join("")}
@@ -381,24 +472,20 @@ export function renderCustomerEmail(order: OrderEmailInput, brand: Brand) {
       <tr><td class="card">
         <table class="sum-table" role="presentation" width="100%">
           <tr><td class="label">Részösszeg</td><td class="right">${money(
-            subtotal,
-            order.currency
+            subtotal
           )}</td></tr>
           <tr><td class="label">Szállítás</td><td class="right">${money(
-            shipping,
-            order.currency
+            shipping
           )}</td></tr>
           ${
             discount
               ? `<tr><td class="label">Kedvezmény</td><td class="right">−${money(
-                  discount,
-                  order.currency
+                  discount
                 )}</td></tr>`
               : ``
           }
           <tr class="grand"><td>Végösszeg</td><td class="right">${money(
-            total,
-            order.currency
+            total
           )}</td></tr>
         </table>
       </td></tr>
@@ -408,37 +495,43 @@ export function renderCustomerEmail(order: OrderEmailInput, brand: Brand) {
           <tr>
             <td>
               <div class="box">
-                <strong>Szállítás</strong><br>
-                ${esc(methodText)}
+                <strong>Vásárló adatai</strong><br>
+                ${customerName ? `${esc(customerName)}<br>` : ""}
                 ${
-                  isLocker
-                    ? `
-                      <div class="muted" style="margin-top:6px">
-                        <div><strong>${esc(
-                          order.pickupPoint?.name || ""
-                        )}</strong></div>
-                        <div>${esc(order.pickupPoint?.address || "")}</div>
-                      </div>`
-                    : ``
+                  customerEmail
+                    ? `E-mail: <a href="mailto:${esc(customerEmail)}">${esc(
+                        customerEmail
+                      )}</a><br>`
+                    : ""
+                }
+                ${
+                  customerPhone
+                    ? `Telefon: <a href="tel:${esc(
+                        customerPhone.replace(/\s+/g, "")
+                      )}">${esc(customerPhone)}</a>`
+                    : customerEmail
+                    ? ""
+                    : `<span class="muted">—</span>`
                 }
               </div>
             </td>
             <td>
               <div class="box">
-                <strong>Szállítási cím</strong><br>
+                <strong>Szállítás</strong><br>
+                ${esc(methodText)}
                 ${
-                  shippingAddr
+                  isLocker && pickup
                     ? `
-                  ${esc(shippingAddr.name || "")}<br>
-                  ${esc(shippingAddr.address || "")}<br>
-                  ${esc(
-                    [shippingAddr.zip, shippingAddr.city]
-                      .filter(Boolean)
-                      .join(" ")
-                  )}<br>
-                  ${esc(shippingAddr.country || "Magyarország")}
-                `
-                    : `<span class="muted">—</span>`
+                      <div class="muted" style="margin-top:6px">
+                        <div><strong>Foxpost automata neve:</strong></div>
+                        <div><strong>${esc(pickup.name)}</strong></div>
+                        ${
+                          pickup.address
+                            ? `<div>${esc(pickup.address)}</div>`
+                            : ""
+                        }
+                      </div>`
+                    : ``
                 }
               </div>
             </td>
@@ -446,24 +539,54 @@ export function renderCustomerEmail(order: OrderEmailInput, brand: Brand) {
           <tr>
             <td style="padding-top:12px">
               <div class="box">
-                <strong>Számlázási cím</strong><br>
+                <strong>Szállítási cím</strong><br>
                 ${
-                  order.billing
+                  isLocker && pickup
                     ? `
-                  ${esc(order.billing.name || "")}<br>
-                  ${esc(order.billing.address || "")}<br>
-                  ${esc(
-                    [order.billing.zip, order.billing.city]
-                      .filter(Boolean)
-                      .join(" ")
-                  )}<br>
-                  ${esc(order.billing.country || "Magyarország")}
+                  ${esc(customerName || shippingAddr?.name || "")}<br>
+                  <span class="muted">Átvétel:</span> ${esc(pickup.name)}<br>
+                  ${esc(pickup.address || "")}
+                  ${
+                    customerPhone
+                      ? `<br>Tel: ${esc(customerPhone)}`
+                      : shippingAddr?.phone
+                      ? `<br>Tel: ${esc(shippingAddr.phone)}`
+                      : ""
+                  }
                 `
-                    : `<span class="muted">—</span>`
+                    : formatAddressBlock(shippingAddr)
+                }
+                ${
+                  !isLocker && shippingAddr?.phone
+                    ? `<br>Tel: ${esc(shippingAddr.phone)}`
+                    : ""
+                }
+                ${
+                  !isLocker && shippingAddr?.email
+                    ? `<br>E-mail: ${esc(shippingAddr.email)}`
+                    : ""
                 }
               </div>
             </td>
             <td style="padding-top:12px">
+              <div class="box">
+                <strong>Számlázási cím</strong><br>
+                ${formatAddressBlock(order.billing)}
+                ${
+                  order.billing?.phone
+                    ? `<br>Tel: ${esc(order.billing.phone)}`
+                    : ""
+                }
+                ${
+                  order.billing?.email
+                    ? `<br>E-mail: ${esc(order.billing.email)}`
+                    : ""
+                }
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td colspan="2" style="padding-top:12px">
               <div class="box">
                 <strong>Megjegyzés</strong><br>
                 ${order.note ? esc(order.note) : `<span class="muted">—</span>`}

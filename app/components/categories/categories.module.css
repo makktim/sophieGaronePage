@@ -1,6 +1,6 @@
 .section {
   padding: 80px 20px;
-  background: linear-gradient(#12261d, #0e1e17);
+  background: transparent;
 }
 
 .main {
@@ -35,7 +35,7 @@
   width: 80px;
   height: 80px;
   border-radius: 50%;
-  background: "#1f6030";
+  background: var(--backgroundLight);
   display: flex;
   align-items: center;
   justify-content: center;

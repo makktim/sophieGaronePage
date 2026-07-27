@@ -1,6 +1,9 @@
 .header {
-  position: sticky;
+  position: fixed;
   top: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
   z-index: 50;
   background: linear-gradient(
     180deg,
@@ -14,19 +17,24 @@
 .inner {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 12px 20px;
+  padding: 8px 20px;
   display: flex;
   align-items: center;
   gap: 16px;
 }
 
 .brand {
-  color: var(--text);
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
   text-decoration: none;
-  white-space: nowrap;
+  line-height: 0;
+}
+
+.brandLogo {
+  display: block;
+  width: auto;
+  height: clamp(36px, 5vw, 46px);
 }
 
 .nav {
@@ -58,6 +66,55 @@
 .navLink:hover {
   color: var(--text);
   background: rgba(255, 255, 255, 0.04);
+}
+
+.navDropdown {
+  position: relative;
+}
+
+.navDropdown:hover .dropdownMenu,
+.navDropdown:focus-within .dropdownMenu {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.dropdownMenu {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  min-width: 190px;
+  list-style: none;
+  padding: 8px;
+  margin: 0;
+  background: linear-gradient(
+    180deg,
+    var(--surface-700) 0%,
+    var(--surface-800) 100%
+  );
+  border: 1px solid var(--ring);
+  border-radius: 12px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(6px);
+  transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s ease;
+}
+
+.dropdownLink {
+  display: block;
+  padding: 10px 12px;
+  border-radius: 8px;
+  color: var(--muted);
+  font-family: var(--bodyFont);
+  font-size: 17px;
+  text-decoration: none;
+  transition: color 0.2s ease, background-color 0.2s ease;
+}
+
+.dropdownLink:hover {
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.06);
 }
 
 .right {
@@ -95,7 +152,7 @@
   height: 18px;
   padding: 0 5px;
   border-radius: 999px;
-  background: #2bb77a;
+  background: #7d8fa8;
   color: #fff;
   font-size: 11px;
   font-weight: 800;
@@ -138,8 +195,10 @@
 
   .mobileSheet {
     display: block;
-    position: absolute;
-    inset: 56px 0 auto 0;
+    position: fixed;
+    top: var(--header-height);
+    left: 0;
+    right: 0;
     background: linear-gradient(
       180deg,
       var(--surface-700),
@@ -177,6 +236,46 @@
   }
   .mobileLink:hover,
   .mobileLinkButton:hover {
+    color: var(--text);
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(240, 237, 230, 0.16);
+  }
+
+  .mobileDropdownGroup {
+    display: grid;
+    gap: 6px;
+  }
+
+  .mobileDropdownLabel {
+    display: block;
+    padding: 12px 10px 4px;
+    color: var(--text);
+    font-weight: 600;
+    font-size: 15px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .mobileDropdownList {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 6px;
+  }
+
+  .mobileDropdownLink {
+    display: block;
+    padding: 12px 10px 12px 18px;
+    border-radius: 12px;
+    text-decoration: none;
+    color: var(--muted);
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--ring);
+    transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+  }
+
+  .mobileDropdownLink:hover {
     color: var(--text);
     background: rgba(255, 255, 255, 0.06);
     border-color: rgba(240, 237, 230, 0.16);

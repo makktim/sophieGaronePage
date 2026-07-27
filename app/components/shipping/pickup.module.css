@@ -22,8 +22,8 @@
 
   background: linear-gradient(
     180deg,
-    var(--surface-800, #0e1416) 0%,
-    var(--surface-700, #151c1f) 100%
+    var(--surface-800, #1a202c) 0%,
+    var(--surface-700, #252e3f) 100%
   );
   color: var(--text, #e9eef2);
   border: 1px solid var(--ring, #23323a);
@@ -66,7 +66,7 @@
 }
 .close:hover {
   opacity: 1;
-  background: var(--surface-700, #151c1f);
+  background: var(--surface-700, #252e3f);
 }
 .close:focus-visible {
   outline: none;
@@ -86,7 +86,7 @@
   padding: 12px 14px;
   border-radius: 12px;
   border: 1px solid var(--ring, #23323a);
-  background: var(--surface-700, #151c1f);
+  background: var(--surface-700, #252e3f);
   color: var(--text, #e9eef2);
   outline: none;
   transition: border-color 0.12s ease, box-shadow 0.12s ease;
@@ -131,12 +131,12 @@
   padding: 14px 16px;
   border: 1px solid var(--ring, #23323a);
   border-radius: 14px;
-  background: color-mix(in oklab, var(--surface-800, #0e1416) 85%, black);
+  background: color-mix(in oklab, var(--surface-800, #1a202c) 85%, black);
   transition: background-color 0.12s ease, border-color 0.12s ease,
     transform 0.06s ease;
 }
 .item:hover {
-  background: color-mix(in oklab, var(--surface-700, #151c1f) 92%, black);
+  background: color-mix(in oklab, var(--surface-700, #252e3f) 92%, black);
   border-color: color-mix(in oklab, var(--ring, #23323a) 80%, #3a4b55);
 }
 .item:active {
@@ -169,7 +169,7 @@
   padding: 10px 12px;
   border-radius: 10px;
   border: 1px solid var(--ring, #23323a);
-  background: var(--surface-700, #151c1f);
+  background: var(--surface-700, #252e3f);
   color: var(--text, #e9eef2);
   font-weight: 600;
   cursor: pointer;
@@ -177,7 +177,7 @@
     box-shadow 0.12s ease, transform 0.06s ease;
 }
 .select:hover {
-  background: color-mix(in oklab, var(--surface-700, #151c1f) 85%, #0b0f11);
+  background: color-mix(in oklab, var(--surface-700, #252e3f) 85%, #0d1117);
   border-color: color-mix(in oklab, var(--ring, #23323a) 75%, #3a4b55);
 }
 .select:active {

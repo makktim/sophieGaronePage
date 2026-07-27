@@ -1,6 +1,7 @@
 interface MenuItem {
   value: string;
   link: string;
+  children?: MenuItem[];
 }
 
 interface Header {

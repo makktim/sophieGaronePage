@@ -23,7 +23,7 @@
   width: 44px;
   height: 44px;
   border-radius: 999px;
-  background: #2e3330;
+  background: var(--slate-base);
   color: var(--paragraph);
   display: inline-grid;
   place-items: center;
@@ -50,6 +50,20 @@
   border-radius: 12px;
 }
 
+.transferBox {
+  margin-top: 18px;
+  padding: 16px;
+  border: 1px solid #bbf7d0;
+  border-radius: 12px;
+  background: #f0fdf4;
+}
+
+.transferTitle {
+  margin: 0 0 12px;
+  font-size: 16px;
+  color: #166534;
+}
+
 .row {
   display: flex;
   justify-content: space-between;
@@ -64,7 +78,7 @@
 .valueMono {
   font-weight: 700;
   color: var(--paragraph);
-  word-break: brek-all;
+  word-break: break-all;
 }
 
 .muted {
@@ -93,9 +107,9 @@
 }
 
 .primaryBtn {
-  background: linear-gradient(180deg, #183025 0%, #0b1a15 100%);
+  background: var(--btn-gradient);
   color: var(--paragraph);
-  box-shadow: 0 4px 12px #183025;
+  box-shadow: var(--btn-shadow);
 }
 
 .ghostBtn {
@@ -109,9 +123,9 @@
 
 .primaryBtn:hover,
 .ghostBtn:hover {
-  background: linear-gradient(180deg, #183025 0%, #0b1a15 100%);
+  background: var(--btn-gradient);
   color: var(--paragraph);
-  box-shadow: 0 6px 18px #183025;
+  box-shadow: var(--btn-shadow-hover);
 }
 
 .smallNote {

@@ -1,7 +1,15 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
+export type CartItem = {
+  id: string;
+  name: string;
+  price: number;
+  quantity: number;
+  imageSrc?: string;
+};
+
 type CartState = {
-  items: Array<{ id: string; name: string; price: number; quantity: number }>;
+  items: CartItem[];
   totalAmount: number;
 };
 
@@ -18,11 +26,18 @@ const cartSlice = createSlice({
         name: string;
         price: number;
         quantity: number;
+        imageSrc?: string;
       }>
     ) {
       const i = state.items.findIndex((x) => x.id === action.payload.id);
-      if (i >= 0) state.items[i].quantity += action.payload.quantity;
-      else state.items.push({ ...action.payload });
+      if (i >= 0) {
+        state.items[i].quantity += action.payload.quantity;
+        if (action.payload.imageSrc) {
+          state.items[i].imageSrc = action.payload.imageSrc;
+        }
+      } else {
+        state.items.push({ ...action.payload });
+      }
       state.totalAmount = state.items.reduce(
         (s, it) => s + it.price * it.quantity,
         0

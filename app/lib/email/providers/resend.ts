@@ -9,13 +9,15 @@ export async function sendEmailResend({
   from,
   subject,
   html,
+  text,
 }: {
   to: string;
   from: string;
   subject: string;
   html: string;
+  text?: string;
 }) {
-  const r = await resend.emails.send({ to, from, subject, html });
+  const r = await resend.emails.send({ to, from, subject, html, text });
   if (r.error) throw new Error(String(r.error?.message || "Resend error"));
   return r;
 }

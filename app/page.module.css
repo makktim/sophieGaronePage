@@ -9,3 +9,7 @@
   min-height: 100svh;
   font-family: var(--font-geist-sans);
 }
+
+.homeProductGrid {
+  padding-top: 16px;
+}

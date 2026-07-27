@@ -6,6 +6,7 @@ import Categories from "./components/categories/categories";
 import BgIntro from "./components/bgIntro/bgIntro";
 import QuotesSection from "./components/quote/qouteSection";
 import ContactForm from "./contact/contactForm";
+import ProductGrid from "./shop/ProductGrid";
 
 export default async function Home() {
 
@@ -14,6 +15,10 @@ export default async function Home() {
     <div className={styles.page}>
 
       <BgIntro />
+      <ProductGrid
+        sectionTitle="Legfrissebb termékek"
+        className={styles.homeProductGrid}
+      />
       <ImageSlider />
       <Describe />
       <QuotesSection />

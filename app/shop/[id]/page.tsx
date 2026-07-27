@@ -1,57 +1,50 @@
-/* // app/product/[id]/page.tsx
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
-
 import { notFound } from "next/navigation";
 import ProductClient from "./ProductClient";
 import { getPrisma, hasDb } from "@/app/lib/prisma";
+import {
+  getShopProductDetail,
+  isShopProductListed,
+  mapApiProductToDetail,
+} from "@/app/lib/shopProduct";
+import { resolveProductId } from "@/app/lib/productCatalog";
 
-type MaybePromise<T> = T | Promise<T>;
 type RouteParams = { id: string };
 
 export default async function ProductPage({
   params,
 }: {
-  params: MaybePromise<RouteParams>;
+  params: Promise<RouteParams>;
 }) {
-  const { id } = await Promise.resolve(params);
+  const { id } = await params;
+  const resolvedId = resolveProductId(id);
 
-  // Ha nincs DB, itt döntsd el: notFound vagy mock
-  if (!hasDb) {
+  if (!isShopProductListed(resolvedId)) {
     return notFound();
-    // vagy:
-    // const mapped = { ...mock };
-    // return <ProductClient product={mapped} />;
+  }
+
+  if (!hasDb) {
+    const fallback = getShopProductDetail(resolvedId);
+    if (!fallback) return notFound();
+    return <ProductClient product={fallback} />;
   }
 
   const prisma = getPrisma();
-  const product = await prisma.product.findUnique({ where: { id } });
+  const product = await prisma.product.findUnique({ where: { id: resolvedId } });
 
-  if (!product) return notFound();
+  if (!product) {
+    const fallback = getShopProductDetail(resolvedId);
+    if (!fallback) return notFound();
+    return <ProductClient product={fallback} />;
+  }
 
-  const mapped = {
-    id: product.id,
-    title: product.title,
-    price: product.priceHUF,
-    currency: "HUF",
-    imageSrc: "/",
-    description:
-      "A megrendelt könyvet a megjelenés dátuma után tudjuk átadni a futárszolgálatnak. Minden példányt dedikálunk és különleges könyvjelzőt adunk hozzá ajándékba.",
-    meta: {
-      type: "Romantikus - akció fantasy",
-      language: "magyar",
-      pages: 514,
-      isbn: "9789636831332",
-    },
-    inStock: (product.stock ?? 0) > 0,
-    deliveryNote: "A megjelenés után 2–4 munkanap",
-  };
-
-  return <ProductClient product={mapped} />;
-}
- */
-
-export default async function ProductPage({}) {
-
-  return null;
+  return (
+    <ProductClient
+      product={mapApiProductToDetail({
+        id: product.id,
+        title: product.title,
+        priceHUF: product.priceHUF,
+        stock: product.stock,
+      })}
+    />
+  );
 }

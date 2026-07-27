@@ -1,17 +1,28 @@
-/* // app/api/create-checkout-session/route.ts
 export const runtime = "nodejs";
-import type { Product } from "@prisma/client";
 
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import { prisma } from "@/app/lib/prisma";
 import { foxpostFetch } from "@/app/lib/foxpostClient";
-import type { OrderEmailInput } from "@/app/lib/email/templates/orderCustomer";
 import { resolveFoxpostPickup } from "@/app/lib/foxpostPickup";
-
-const { sendOrderEmails } = await import("@/app/lib/email/send");
-
-// ===== Types =====
+import type { OrderEmailInput } from "@/app/lib/email/templates/orderCustomer";
+import { resolveProductId } from "@/app/lib/productCatalog";
+import {
+  assertPendingOrderRateLimit,
+  computeOrderTotals,
+  MAX_NOTE_LENGTH,
+  normalizeCartLines,
+  normalizeShippingMethod,
+  resolveStripeShippingPriceId,
+  sanitizeAddress,
+  sanitizeEmail,
+  sanitizePhone,
+  sanitizeText,
+  validateCheckoutOrigin,
+  resolveFoxpostFulfillmentMethod,
+} from "@/app/lib/checkoutSecurity";
+import { isShopProductListed } from "@/app/lib/shopProduct";
+import { normHuPhone } from "@/app/lib/phone";
 
 type Address = {
   name?: string;
@@ -22,89 +33,19 @@ type Address = {
   address?: string;
 };
 
-type CartItem = {
-  id: string;
-  name?: string;
-  quantity: number;
-};
-
 type BodyShape = {
-  items: CartItem[];
+  items: Array<{ id?: string; quantity?: number; qty?: number }>;
   customer?: {
     email?: string;
     phone?: string;
     billing?: Address;
     shippingAddress?: Address;
   };
-  shippingMethod?:
-    | "foxpost_locker"
-    | "foxpost_home"
-    | "gls_courier"
-    | "courier"
-    | string;
+  shippingMethod?: string;
   pickupPoint?: { id?: string } | null;
-  shippingCost?: number;
-  subtotal?: number;
-  discount?: number;
-  total?: number;
-  totals?: {
-    subtotal?: number;
-    shipping?: number;
-    discount?: number;
-    total?: number;
-  };
   note?: string;
-  coupon?: string;
-  paymentHint?: "card" | "cod" | string;
-};
-
-type FoxpostParcelResponseItem = {
-  clFoxId?: string; // locker esetén
-  barcodeTof?: string; // házhoz esetén
-  sendType?: "APM" | "HD" | "COLLECT";
-  errors?: unknown;
-};
-
-// Minimál order shape, ami ebben a fájlban kell
-type OrderItemRow = {
-  productId: string;
-  qty: number;
-  priceHUF: number;
-};
-type OrderRow = {
-  id: string;
-  orderNo: string;
-  userEmail: string;
-  status: string;
-  totalHUF: number;
-  subtotalHUF: number;
-  shippingHUF: number;
-  discountHUF: number;
-  paymentMethod: string;
-  shippingMethod: string;
-  pickupPointId: string;
-  shippingParcelId: string;
-  billing: Address;
-  shipping: Address;
-  note: string | null;
-  items: OrderItemRow[];
-};
-
-// ===== Stripe init =====
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2025-08-27.basil",
-});
-
-// ===== Helpers =====
-
-const clip = (obj: unknown, max = 480): string => {
-  try {
-    const s = typeof obj === "string" ? obj : JSON.stringify(obj ?? {});
-    return s.length > max ? `${s.slice(0, max)}…` : s;
-  } catch {
-    return String(obj ?? "");
-  }
+  paymentHint?: string;
+  acceptTos?: boolean;
 };
 
 function genOrderNo(): string {
@@ -116,26 +57,10 @@ function genOrderNo(): string {
   return `ORD-${y}${m}${day}-${rnd}`;
 }
 
-// +36-os normalizáló (Foxpost elvárás)
-function normHuPhone(input?: string): string {
-  const s = String(input ?? "").replace(/\D+/g, "");
-  if (!s) return "";
-  if (s.startsWith("36")) return `+${s}`;
-  if (s.startsWith("06")) return `+36${s.slice(2)}`;
-  if (s.startsWith("0")) return `+36${s.slice(1)}`;
-  return s.startsWith("+") ? s : `+${s}`;
-}
-
-function toHUF(v: unknown, def = 0): number {
-  const n = Math.round(Number(v ?? def));
-  return n > 0 ? n : 0;
-}
-
 function isSandboxFoxpost(): boolean {
   return (process.env.FOXPOST_BASE_URL || "").includes("webapi-test");
 }
 
-// FoxWeb /parcel hívás COD rendeléshez (locker vagy home)
 async function createFoxpostParcelCOD(params: {
   shippingMethod: string;
   pickupPointId: string;
@@ -146,62 +71,32 @@ async function createFoxpostParcelCOD(params: {
   shipping: Address;
   note: string;
 }): Promise<string | null> {
-  const {
-    shippingMethod,
-    pickupPointId,
-    orderNo,
-    totalHUF,
-    email,
-    billing,
-    shipping,
-    note,
-  } = params;
-
-  const size = "M"; // kötelező – végső méretet Foxpost állapítja meg
+  const { shippingMethod, pickupPointId, orderNo, totalHUF, email, billing, shipping, note } = params;
+  const size = "M";
   const recipientName = shipping.name || billing.name || "N/A";
   const recipientEmail = email || billing.email || shipping.email || "";
   const recipientPhone = normHuPhone(shipping.phone || billing.phone);
 
-  let item:
-    | {
-        // locker
-        recipientName: string;
-        recipientEmail: string;
-        recipientPhone: string;
-        destination: string;
-        size: string;
-        refCode: string;
-        cod: number;
-        comment?: string;
-      }
-    | {
-        // home
-        recipientName: string;
-        recipientEmail: string;
-        recipientPhone: string;
-        recipientZip: string;
-        recipientCity: string;
-        recipientAddress: string;
-        recipientCountry: "HU";
-        size: string;
-        refCode: string;
-        cod: number;
-        comment?: string;
-      };
+  let item: Record<string, unknown>;
 
-  if (shippingMethod === "foxpost_locker") {
+  const fulfillmentMethod = resolveFoxpostFulfillmentMethod(shippingMethod);
+  if (!fulfillmentMethod) {
+    return null;
+  }
+
+  if (fulfillmentMethod === "foxpost_locker") {
     if (!pickupPointId) throw new Error("Hiányzik a pickupPointId lockerhez.");
     item = {
       recipientName,
       recipientEmail,
       recipientPhone,
-      destination: pickupPointId, // operator_id
+      destination: pickupPointId,
       size,
       refCode: orderNo,
-      cod: toHUF(totalHUF),
-      ...(note ? { comment: String(note).slice(0, 50) } : {}),
+      cod: totalHUF,
+      ...(note ? { comment: note.slice(0, 50) } : {}),
     };
-  } else if (shippingMethod === "foxpost_home") {
+  } else if (fulfillmentMethod === "foxpost_home") {
     if (!shipping.zip || !shipping.city || !shipping.address) {
       throw new Error("Hiányos cím házhozszállításhoz (zip/city/address).");
     }
@@ -215,192 +110,214 @@ async function createFoxpostParcelCOD(params: {
       recipientCountry: "HU",
       size,
       refCode: orderNo,
-      cod: toHUF(totalHUF),
-      ...(note ? { comment: String(note).slice(0, 50) } : {}),
+      cod: totalHUF,
+      ...(note ? { comment: note.slice(0, 50) } : {}),
     };
   } else {
-    // Nem Foxpost szállítás – nem hozunk létre csomagot
     return null;
   }
 
   const query = isSandboxFoxpost() ? "?isWeb=false" : "";
   const res = await foxpostFetch(`/parcel${query}`, {
     method: "POST",
-    body: JSON.stringify([item]), // TÖMB kell!
+    body: JSON.stringify([item]),
   });
 
   const raw = await res.text();
-
   if (res.status !== 201) {
     console.error("Foxpost /parcel error:", res.status, raw);
     return null;
   }
 
-  let arr: unknown;
+  let parsed: unknown;
   try {
-    arr = JSON.parse(raw || "[]");
+    parsed = JSON.parse(raw || "[]");
   } catch {
     return null;
   }
-  const first = Array.isArray(arr)
-    ? (arr[0] as FoxpostParcelResponseItem)
-    : (arr as FoxpostParcelResponseItem);
-  const clFoxId = first?.clFoxId;
-  const barcodeTof = first?.barcodeTof;
 
-  return clFoxId || barcodeTof || null;
+  const first = Array.isArray(parsed)
+    ? (parsed[0] as Record<string, unknown>)
+    : (parsed as Record<string, unknown>);
+  return ((first?.clFoxId as string | undefined) || (first?.barcodeTof as string | undefined) || null) as string | null;
 }
-
-// ===== Route =====
 
 export async function POST(req: Request) {
   try {
+    if (!validateCheckoutOrigin(req)) {
+      return NextResponse.json({ error: "Érvénytelen kérés forrása." }, { status: 403 });
+    }
+
     if (!process.env.STRIPE_SECRET_KEY) {
-      return NextResponse.json(
-        { error: "Hiányzik a STRIPE_SECRET_KEY." },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: "Hiányzik a STRIPE_SECRET_KEY." }, { status: 500 });
     }
 
     const body: BodyShape = await req.json();
-    const cartItems = Array.isArray(body.items) ? body.items : [];
-    if (!cartItems.length) {
-      return NextResponse.json({ error: "A kosár üres." }, { status: 400 });
+    if (!body.acceptTos) {
+      return NextResponse.json({ error: "Az ÁSZF elfogadása kötelező." }, { status: 400 });
     }
 
-    // 1) Termékek validálása DB-vel (árak innen jönnek)
-    const productIds = cartItems.map((it) => String(it.id));
+    const lines = normalizeCartLines(body.items, resolveProductId);
+    const productIds = [...new Set(lines.map((line) => line.productId))];
+
     const products = await prisma.product.findMany({
       where: { id: { in: productIds } },
-      select: {
-        id: true,
-        title: true,
-        priceHUF: true,
-        stock: true,
-        stripePriceId: true,
-      },
+      select: { id: true, title: true, priceHUF: true, stock: true, stripePriceId: true },
     });
+
     const byId = new Map(products.map((p) => [p.id, p]));
     const missing = productIds.filter((id) => !byId.has(id));
     if (missing.length) {
       return NextResponse.json(
+        { error: "Ismeretlen termék(ek) a kosárban.", missingProductIds: missing },
+        { status: 400 }
+      );
+    }
+
+    const unavailable = productIds.filter((id) => !isShopProductListed(id));
+    if (unavailable.length) {
+      return NextResponse.json(
         {
-          error: "Ismeretlen termék(ek) a kosárban.",
-          missingProductIds: missing,
+          error:
+            "Egy vagy több termék jelenleg nem rendelhető a webshopból. Távolítsd el a kosárból, majd próbáld újra.",
+          unavailableProductIds: unavailable,
         },
         { status: 400 }
       );
     }
 
-    // 2) Összegek (HUF, egész)
-    const computedSubtotal = cartItems.reduce((sum, it) => {
-      const p = byId.get(String(it.id));
-      if (!p) return sum;
-      return sum + Number(p.priceHUF) * Math.max(1, Number(it.quantity || 1));
-    }, 0);
+    const shippingMethod = normalizeShippingMethod(body.shippingMethod);
+    const pickupPointId = sanitizeText(body.pickupPoint?.id, 64);
+    const paymentHintRaw = sanitizeText(body.paymentHint ?? "card", 24).toLowerCase();
+    const paymentMethod =
+      paymentHintRaw === "transfer" || paymentHintRaw === "bank_transfer"
+        ? "transfer"
+        : paymentHintRaw === "cod"
+        ? "cod"
+        : "card";
+    const isOfflinePayment = paymentMethod === "transfer" || paymentMethod === "cod";
+    const note = sanitizeText(body.note, MAX_NOTE_LENGTH);
 
-    const subtotalHUF = toHUF(
-      body.totals?.subtotal ?? body.subtotal ?? computedSubtotal
+    const userEmail = sanitizeEmail(body.customer?.email);
+    if (!userEmail) {
+      return NextResponse.json({ error: "Érvénytelen e-mail cím." }, { status: 400 });
+    }
+
+    const customerPhone = sanitizePhone(body.customer?.phone);
+    if (customerPhone.replace(/\D/g, "").length < 6) {
+      return NextResponse.json({ error: "Érvénytelen telefonszám." }, { status: 400 });
+    }
+
+    if (shippingMethod === "foxpost_locker" && !pickupPointId) {
+      return NextResponse.json({ error: "Válassz csomagautomatát." }, { status: 400 });
+    }
+
+    const billing = sanitizeAddress(body.customer?.billing, userEmail, customerPhone);
+    const shippingAddr = sanitizeAddress(
+      body.customer?.shippingAddress ?? body.customer?.billing,
+      userEmail,
+      customerPhone
     );
-    const shippingHUF = toHUF(body.totals?.shipping ?? body.shippingCost ?? 0);
-    const discountHUF = toHUF(body.totals?.discount ?? body.discount ?? 0);
-    const totalHUF = toHUF(
-      body.totals?.total ??
-        body.total ??
-        subtotalHUF + shippingHUF - discountHUF
+
+    if (!billing.name || !billing.zip || !billing.city || !billing.address) {
+      return NextResponse.json({ error: "Hiányos számlázási cím." }, { status: 400 });
+    }
+
+    const productMap = new Map(
+      products.map((p) => [p.id, { priceHUF: Number(p.priceHUF), stock: Number(p.stock) }])
     );
 
-    // 3) Szállítás/fizetés
-    const paymentMethod = String(body.paymentHint ?? "card").toLowerCase(); // "card" | "cod"
-    const shippingMethod = String(body.shippingMethod ?? "foxpost_locker");
-    const pickupPointId = String(body.pickupPoint?.id ?? "");
+    const { subtotalHUF, shippingHUF, discountHUF, totalHUF } = computeOrderTotals({
+      lines,
+      products: productMap,
+      shippingMethod,
+    });
 
-    // 4) Címek
-    const billing: Address = body.customer?.billing ?? {};
-    const shippingAddr: Address =
-      body.customer?.shippingAddress ?? body.customer?.billing ?? {};
-    const userEmail = body.customer?.email ?? "unknown@example.com";
+    await assertPendingOrderRateLimit(userEmail);
 
-    // 5) OrderNo + URL-ek
     const orderNo = genOrderNo();
-    const base = (
-      process.env.NEXT_PUBLIC_APP_URL ||
-      process.env.NEXT_PUBLIC_SITE_URL ||
-      "http://localhost:3000"
-    ).replace(/\/$/, "");
-    const successUrl = `${base}/success?session_id={CHECKOUT_SESSION_ID}&order_no=${orderNo}`;
+    const base = (process.env.NEXT_PUBLIC_APP_URL || process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000").replace(/\/$/, "");
     const cancelUrl = `${base}/cart`;
 
-    // 6) Order mentése PENDING-ként (minden kötelező mező)
-    const order = (await prisma.order.create({
-      data: {
-        userEmail,
-        status: "PENDING",
-        orderNo,
-        totalHUF,
-        subtotalHUF,
-        shippingHUF,
-        discountHUF,
-        paymentMethod,
-        shippingMethod,
-        pickupPointId,
-        shippingParcelId: "",
-        billing,
-        shipping: shippingAddr,
-        note: String(body.note ?? ""),
-        items: {
-          create: cartItems.map((it) => {
-            const p = byId.get(String(it.id))!;
-            return {
-              productId: p.id,
-              qty: Math.max(1, Number(it.quantity || 1)),
-              priceHUF: Number(p.priceHUF),
-            };
-          }),
-        },
-      },
-      include: { items: true },
-    })) as unknown as OrderRow;
+    const order = await prisma.$transaction(async (tx) => {
+      for (const line of lines) {
+        const product = await tx.product.findUnique({
+          where: { id: line.productId },
+          select: { stock: true },
+        });
+        if (!product || product.stock < line.quantity) {
+          throw new Error("A kért mennyiség nem áll rendelkezésre raktáron.");
+        }
+      }
 
-    // 7) COD (utánvét) ág — NINCS Stripe, Foxpost csomag azonnal
-    if (paymentMethod === "cod") {
-      try {
-        const parcelId = await createFoxpostParcelCOD({
-          shippingMethod,
-          pickupPointId,
+      const created = await tx.order.create({
+        data: {
+          userEmail,
+          status: "PENDING",
           orderNo,
           totalHUF,
-          email: userEmail,
+          subtotalHUF,
+          shippingHUF,
+          discountHUF,
+          paymentMethod,
+          shippingMethod,
+          pickupPointId,
+          shippingParcelId: "",
           billing,
           shipping: shippingAddr,
-          note: String(body.note ?? ""),
-        });
+          note,
+          items: {
+            create: lines.map((line) => {
+              const product = byId.get(line.productId);
+              if (!product) throw new Error(`Missing product ${line.productId}`);
+              return {
+                productId: product.id,
+                qty: line.quantity,
+                priceHUF: Number(product.priceHUF),
+              };
+            }),
+          },
+        },
+        include: { items: true },
+      });
 
-        if (parcelId) {
-          await prisma.order.update({
-            where: { id: order.id },
-            data: { shippingParcelId: parcelId },
+      if (isOfflinePayment) {
+        for (const line of lines) {
+          const updated = await tx.product.updateMany({
+            where: { id: line.productId, stock: { gte: line.quantity } },
+            data: { stock: { decrement: line.quantity } },
           });
-        } else {
-          console.error(
-            "Foxpost COD create returned null (parcel not created)."
-          );
+          if (updated.count !== 1) {
+            throw new Error("A kért mennyiség nem áll rendelkezésre raktáron.");
+          }
         }
+      }
 
-        // készlet csökkentése
-        if (order.items.length) {
-          await prisma.$transaction(
-            order.items.map((it) =>
-              prisma.product.update({
-                where: { id: it.productId },
-                data: { stock: { decrement: it.qty } },
-              })
-            )
-          );
+      return created;
+    });
+
+    if (isOfflinePayment) {
+      // Offline payments must never reach Stripe Checkout below.
+      // COD: create Foxpost parcel with cash-on-delivery.
+      // Transfer: reserve stock + email only (parcel after payment confirmation).
+      if (paymentMethod === "cod") {
+        try {
+          const parcelId = await createFoxpostParcelCOD({
+            shippingMethod,
+            pickupPointId,
+            orderNo,
+            totalHUF,
+            email: userEmail,
+            billing,
+            shipping: shippingAddr,
+            note,
+          });
+          if (parcelId) {
+            await prisma.order.update({ where: { id: order.id }, data: { shippingParcelId: parcelId } });
+          }
+        } catch (codErr) {
+          console.error("COD flow error:", codErr);
         }
-      } catch (codErr) {
-        const m = codErr instanceof Error ? codErr.message : String(codErr);
-        console.error("COD flow error:", m);
       }
 
       const pickupPointInfo =
@@ -408,66 +325,77 @@ export async function POST(req: Request) {
           ? await resolveFoxpostPickup(pickupPointId)
           : null;
 
-      const customerName = shippingAddr.name ?? billing.name ?? "";
-
       const emailPayload: OrderEmailInput = {
         id: order.id,
-       // order_no: order.orderNo,
         amount_total: totalHUF,
+        amountScale: 1,
         currency: "HUF",
         customer_email: order.userEmail,
-        customer_name: customerName,
-        payment_status: "cod",
-        payment_label: "Utánvét",
-        //billing,
-        //shipping: shippingAddr,
-        pickupPoint: pickupPointInfo || undefined,
-       // note: order.note ?? null,
-        totals: {
-          subtotal: subtotalHUF,
-          shipping: shippingHUF,
-          discount: discountHUF,
-          total: totalHUF,
-        },
+        customer_name: shippingAddr.name ?? billing.name ?? "",
+        payment_status: paymentMethod,
+        payment_label: paymentMethod === "transfer" ? "Átutalás" : "Utánvét",
+        shippingMethod,
+        billing,
+        shipping: shippingAddr,
+        note,
+        pickupPoint: pickupPointInfo
+          ? {
+              carrier: "FOXPOST",
+              id: pickupPointInfo.id,
+              name: pickupPointInfo.name,
+              address: pickupPointInfo.address,
+            }
+          : undefined,
+        pickupPointLabel: pickupPointInfo
+          ? `${pickupPointInfo.name} — ${pickupPointInfo.address}`
+          : undefined,
+        totals: { subtotal: subtotalHUF, shipping: shippingHUF, discount: discountHUF, total: totalHUF },
         line_items: order.items.map((li) => ({
           description: byId.get(li.productId)?.title ?? "Tétel",
           quantity: li.qty,
           amount_total: li.priceHUF * li.qty,
         })),
+        orderNo,
       };
 
-      await sendOrderEmails(emailPayload);
+      try {
+        const { sendOrderEmails } = await import("@/app/lib/email/send");
+        await sendOrderEmails(emailPayload as never);
+        await prisma.order.update({
+          where: { id: order.id },
+          data: { confirmationEmailSentAt: new Date() },
+        });
+      } catch (emailErr) {
+        console.error(
+          `[ORDER] Offline order email failed for ${orderNo}:`,
+          emailErr instanceof Error ? emailErr.message : emailErr
+        );
+      }
 
+      const offlineFlag = paymentMethod === "transfer" ? "transfer=1" : "cod=1";
       return NextResponse.json(
-        { cod: true, orderNo, redirect: `${base}/success?order_no=${orderNo}` },
+        {
+          ...(paymentMethod === "transfer" ? { transfer: true } : { cod: true }),
+          orderNo,
+          redirect: `${base}/success?order_no=${encodeURIComponent(orderNo)}&${offlineFlag}`,
+        },
         { status: 200 }
       );
     }
 
-    // --- 8) Kártyás (Stripe) ág — Price ID preferált, fallback price_data ---
-
-    // opcionális: szállítási árakhoz külön Price ID-k (ENV-ből)
-    const SHIPPING_PRICE_IDS: Record<string, string | undefined> = {
-      foxpost_locker: process.env.STRIPE_PRICE_SHIPPING_FOXPOST_LOCKER,
-      foxpost_home: process.env.STRIPE_PRICE_SHIPPING_FOXPOST_HOME,
-      gls_courier: process.env.STRIPE_PRICE_SHIPPING_GLS,
-      courier: process.env.STRIPE_PRICE_SHIPPING_COURIER,
-    };
-    const FALLBACK_SHIPPING_PRICE_ID = process.env.STRIPE_PRICE_SHIPPING_ID;
-
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: "2025-08-27.basil" });
     const stripeLineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = [];
-
-    // ── Skála detektálása a HUF-hoz (1 vagy 100) a meglévő Stripe Price alapján ──
     let hufScale = 1;
-    for (const it of cartItems) {
-      const p = byId.get(String(it.id));
-      if (p?.stripePriceId?.startsWith("price_")) {
+
+    for (const line of lines) {
+      const product = byId.get(line.productId);
+      if (product?.stripePriceId?.startsWith("price_")) {
         try {
-          const pr = await stripe.prices.retrieve(p.stripePriceId);
+          const pr = await stripe.prices.retrieve(product.stripePriceId);
           if (pr?.currency === "huf" && typeof pr.unit_amount === "number") {
-            const dbUnit = Number(p.priceHUF) || 0;
+            const dbUnit = Number(product.priceHUF) || 0;
             if (dbUnit > 0) {
-              const ratio = pr.unit_amount / dbUnit; // pl. 629000 / 6290 = 100
+              const ratio = pr.unit_amount / dbUnit;
               if (Math.abs(ratio - 100) < 0.5) hufScale = 100;
             }
           }
@@ -478,50 +406,32 @@ export async function POST(req: Request) {
       }
     }
 
-    // Terméktételek
-    for (const it of cartItems) {
-      const p = byId.get(String(it.id)) as
-        | (Product & { stripePriceId: string | null })
-        | undefined;
-      if (!p) continue;
+    for (const line of lines) {
+      const product = byId.get(line.productId);
+      if (!product) continue;
 
-      const quantity = Math.max(1, Number(it.quantity || 1));
-
-      if (p.stripePriceId) {
-        // Előre létrehozott Stripe Price ID használata
-        stripeLineItems.push({
-          price: p.stripePriceId,
-          quantity,
-        });
+      if (product.stripePriceId) {
+        stripeLineItems.push({ price: product.stripePriceId, quantity: line.quantity });
       } else {
-        // Fallback: dinamikus price_data a DB-ből
         stripeLineItems.push({
-          quantity,
+          quantity: line.quantity,
           price_data: {
             currency: "huf",
-            unit_amount: Math.max(1, Math.round(Number(p.priceHUF) * hufScale)),
+            unit_amount: Math.max(1, Math.round(Number(product.priceHUF) * hufScale)),
             product_data: {
-              name: it.name || p.title || "Termék",
-              metadata: { productId: String(p.id) },
+              name: product.title || "Termék",
+              metadata: { productId: String(product.id) },
             },
           },
         });
       }
     }
 
-    // Szállítás
     if (shippingHUF > 0) {
-      const shippingPriceId =
-        SHIPPING_PRICE_IDS[shippingMethod] || FALLBACK_SHIPPING_PRICE_ID;
-
+      const shippingPriceId = resolveStripeShippingPriceId(shippingMethod);
       if (shippingPriceId) {
-        // Fix összegű, Stripe-on előre létrehozott szállítási Price
-        stripeLineItems.push({
-          price: shippingPriceId,
-          quantity: 1,
-        });
+        stripeLineItems.push({ price: shippingPriceId, quantity: 1 });
       } else {
-        // Dinamikus szállítási költség
         stripeLineItems.push({
           quantity: 1,
           price_data: {
@@ -538,36 +448,33 @@ export async function POST(req: Request) {
       order_no: orderNo,
       shipping_method: shippingMethod,
       pickup_point_id: pickupPointId || "",
+      payment_hint: paymentMethod,
       huf_scale: String(hufScale),
-      billing_json: clip(billing),
-      shipping_json: clip(shippingAddr),
-      totals_json: clip({
-        subtotal: subtotalHUF,
-        shipping: shippingHUF,
-        discount: discountHUF,
-        total: totalHUF,
-      }),
-      note: String(body.note ?? ""),
-      items_json: clip(
-        order.items.map((li) => ({
-          productId: li.productId,
-          qty: li.qty,
-          unit: li.priceHUF,
-        }))
-      ),
-    } satisfies Record<string, string>;
+      note,
+    };
 
-    const session = await stripe.checkout.sessions.create({
-      mode: "payment",
-      line_items: stripeLineItems,
-      success_url: successUrl,
-      cancel_url: cancelUrl,
-      customer_email: userEmail || undefined,
-      client_reference_id: orderNo,
-      allow_promotion_codes: true,
-      metadata: baseMeta,
-      payment_intent_data: { metadata: baseMeta },
-    });
+    const successUrl = `${base}/success?session_id={CHECKOUT_SESSION_ID}&order_no=${encodeURIComponent(orderNo)}`;
+    // Scope the key to this order: each checkout attempt creates a new order, so a
+    // reused client Idempotency-Key must not collide across different Stripe payloads.
+    const clientKey = sanitizeText(req.headers.get("Idempotency-Key"), 180);
+    const idempotencyKey = clientKey
+      ? `${clientKey}:${order.id}`
+      : `checkout:${order.id}`;
+
+    const session = await stripe.checkout.sessions.create(
+      {
+        mode: "payment",
+        line_items: stripeLineItems,
+        success_url: successUrl,
+        cancel_url: cancelUrl,
+        customer_email: userEmail,
+        client_reference_id: orderNo,
+        allow_promotion_codes: false,
+        metadata: baseMeta,
+        payment_intent_data: { metadata: baseMeta },
+      },
+      { idempotencyKey }
+    );
 
     if (!session?.url) {
       return NextResponse.json(
@@ -576,34 +483,18 @@ export async function POST(req: Request) {
       );
     }
 
-    return NextResponse.json(
-      { id: session.id, url: session.url },
-      { status: 200 }
-    );
+    return NextResponse.json({ id: session.id, url: session.url }, { status: 200 });
   } catch (err) {
-    const e =
-      (err as {
-        raw?: { message?: string; code?: string };
-        message?: string;
-        code?: string;
-      }) || {};
-    const msg =
-      e.raw?.message ||
-      e.message ||
-      "Ismeretlen hiba a fizetési session létrehozásakor.";
-    const code = e.raw?.code || e.code;
-    console.error("create-checkout-session error:", code || "", msg, err);
-    return NextResponse.json(
-      { error: msg, code: code || undefined },
-      { status: 500 }
-    );
+    const message =
+      err instanceof Error ? err.message : "Ismeretlen hiba a fizetési session létrehozásakor.";
+    const status = /raktáron|kosár|ÁSZF|Érvénytelen|Hiányos|csomagautomat|függőben/i.test(message)
+      ? 400
+      : 500;
+    console.error("create-checkout-session error:", message, err);
+    return NextResponse.json({ error: message }, { status });
   }
 }
- */
 
 export async function GET() {
-  return new Response(JSON.stringify({ message: "Hello from app API!" }), {
-    status: 200,
-    headers: { "Content-Type": "application/json" },
-  });
+  return NextResponse.json({ ok: true, message: "Checkout API ready" });
 }

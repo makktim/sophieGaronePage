@@ -7,7 +7,7 @@ export type ShippingMethod =
   | "gls_parcelshop"
   | "foxpost_locker"
   | "pickup";
-export type PaymentHint = "card" | "cod";
+export type PaymentHint = "card" | "transfer" | "cod";
 
 export interface PickupPoint {
   carrier: "GLS" | "FOXPOST";

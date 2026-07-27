@@ -6,11 +6,14 @@ import { NextRequest, NextResponse } from "next/server";
 import nodemailer from "nodemailer";
 
 function getTransport() {
-  const user = process.env.GMAIL_USER;
-  const pass = process.env.GMAIL_PASS;
+  const user = process.env.GMAIL_USER || process.env.NEXT_PUBLIC_GMAIL_USER;
+  const pass = (process.env.GMAIL_PASS || process.env.NEXT_PUBLIC_GMAIL_PASS || "").replace(
+    /\s+/g,
+    ""
+  );
 
   if (!user || !pass) {
-    throw new Error("Missing SMTP env: set GMAIL_USER and GMAIL_PASS");
+    throw new Error("Missing SMTP env: set GMAIL_USER/GMAIL_PASS or NEXT_PUBLIC_GMAIL_USER/NEXT_PUBLIC_GMAIL_PASS");
   }
 
   return nodemailer.createTransport({
@@ -35,10 +38,10 @@ export async function POST(req: NextRequest) {
     }
 
     const transporter = getTransport();
-    const to = process.env.CONTACT_TO || process.env.GMAIL_USER!;
+    const to = process.env.CONTACT_TO || process.env.GMAIL_USER || process.env.NEXT_PUBLIC_GMAIL_USER!;
 
     await transporter.sendMail({
-      from: `"${name}" <${process.env.GMAIL_USER!}>`,
+      from: `"${name}" <${process.env.GMAIL_USER || process.env.NEXT_PUBLIC_GMAIL_USER!}>`,
       replyTo: email,
       to,
       subject: `Kapcsolatfelvétel: ${name}`,

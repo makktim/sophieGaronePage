@@ -1,5 +1,5 @@
 .section {
-  background: linear-gradient(180deg, #183025 0%, #0b1a15 100%);
+  background: transparent;
   padding: 32px;
   color: var(--foreground);
 }
@@ -16,7 +16,7 @@
 .card {
   max-width: 800px;
   margin: 0 auto;
-  background: #1830259d;
+  background: var(--card-overlay);
   border: 1px solid var(--text);
   border-radius: 22px;
   box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
@@ -31,7 +31,7 @@
   display: grid;
   grid-template-columns: 1fr;
   gap: 14px;
-  background: #1830259d;
+  background: var(--card-overlay);
   border-right: 1px solid rgba(255, 255, 255, 0.06);
 }
 
@@ -50,7 +50,7 @@
   padding: 8px 0;
 }
 .input:focus {
-  border-bottom-color: #2fa15b;
+  border-bottom-color: var(--accent);
 }
 
 .textarea {
@@ -62,7 +62,7 @@
   margin-top: 10px;
 }
 .button {
-  background: linear-gradient(180deg, #183025 0%, #0b1a15 100%);
+  background: var(--btn-gradient);
   color: var(--text);
   font-weight: 700;
   border: 1px solid var(--text);
@@ -72,10 +72,10 @@
   transition: transform 0.15s ease, box-shadow 0.2s ease, background 0.2s ease;
 }
 .button:hover {
-  background: linear-gradient(180deg, #183025 0%, #0b1a15 100%);
+  background: var(--btn-gradient);
   color: var(--paragraph);
   transform: translateY(-2px) scale(1.05);
-  box-shadow: 0 6px 18px #183025;
+  box-shadow: var(--btn-shadow-hover);
 }
 
 .success {
@@ -92,7 +92,7 @@
   display: grid;
   align-content: center;
   gap: 24px;
-  background: #1830259d;
+  background: var(--card-overlay);
 }
 
 .contactList {
@@ -130,7 +130,7 @@
   width: 36px;
   height: 36px;
   border-radius: 999px;
-  background: #1830259d;
+  background: var(--card-overlay);
   color: var(--backgroundLight);
   font-weight: 700;
   text-transform: lowercase;

@@ -1,10 +1,16 @@
 {
   "Header": {
     "menuitem": [
-      { "value": "First chapter", "onclick": "CreateNewDoc()" },
-      { "value": "About", "onclick": "OpenDoc()" },
-      { "value": "Shop", "onclick": "CloseDoc()" },
-      { "value": "contact", "onclick": "CloseDoc()" }
+      {
+        "value": "Preview",
+        "link": "/firstChapter",
+        "children": [
+          { "value": "First chapter", "link": "/firstChapter" }
+        ]
+      },
+      { "value": "About", "link": "/about" },
+      { "value": "Shop", "link": "/shop" },
+      { "value": "Contact", "link": "/contact" }
     ]
   },
   "intro": {

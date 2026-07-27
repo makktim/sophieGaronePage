@@ -4,12 +4,7 @@
   margin: 0 auto;
   padding: 2.5rem 1.25rem;
   color: var(--foreground);
-  background: linear-gradient(
-    180deg,
-    var(--aszf-bg),
-    #0a0d0e 60%,
-    var(--aszf-bg)
-  );
+  background: transparent;
 }
 
 /* Címek és meta */
@@ -28,7 +23,7 @@
 
 /* Tartalomjegyzék */
 .toc {
-  background: linear-gradient(180deg, #183025 0%, #0b1a15 100%);
+  background: var(--btn-gradient);
   border: 1px solid var(--foreground);
   border-radius: 12px;
   padding: 1rem 1rem 1.1rem;

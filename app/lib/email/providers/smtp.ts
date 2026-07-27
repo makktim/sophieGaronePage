@@ -1,24 +1,34 @@
-// app/lib/email/providers/smtp.ts
-import nodemailer from "nodemailer";
-
-const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST!,
-  port: Number(process.env.SMTP_PORT || 587),
-  secure: Number(process.env.SMTP_PORT) === 465,
-  auth: { user: process.env.SMTP_USER!, pass: process.env.SMTP_PASS! },
-});
+import { createEmailTransport } from "../transport";
+import crypto from "crypto";
 
 export async function sendEmailSmtp({
   to,
   from,
   subject,
   html,
+  text,
+  extraHeaders,
 }: {
   to: string;
   from: string;
   subject: string;
   html: string;
+  text?: string;
+  extraHeaders?: Record<string, string>;
 }) {
-  const info = await transporter.sendMail({ to, from, subject, html });
+  const transporter = createEmailTransport();
+  const info = await transporter.sendMail({
+    to,
+    from,
+    replyTo: from,
+    subject,
+    html,
+    text,
+    headers: {
+      'Precedence': 'transactional',
+      'X-Entity-Ref-ID': `sophiegarone-${crypto.randomUUID()}`,
+      ...extraHeaders,
+    },
+  });
   return info;
 }

@@ -6,7 +6,13 @@ const storage = () =>
 // ha inkább session kell: window.sessionStorage
 
 export type PersistedCart = {
-  items: Array<{ id: string; name: string; price: number; quantity: number }>;
+  items: Array<{
+    id: string;
+    name: string;
+    price: number;
+    quantity: number;
+    imageSrc?: string;
+  }>;
   totalAmount: number;
   updatedAt: number;
 };
