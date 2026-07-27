@@ -66,17 +66,30 @@ const PRODUCTS = [
     stock: 100,
     stripePriceId: "price_1Txw5YRVMPQ6s4fB9UT3292v",
   },
+  {
+    id: "a1b2c3d4-e5f6-7890-ab12-000000000099",
+    title: "Éles próba – teszt termék",
+    priceHUF: 200,
+    stock: 50,
+    stripePriceId: null as unknown as string,
+  },
 ] as const;
 
 async function main() {
   for (const product of PRODUCTS) {
+    const data = {
+      title: product.title,
+      priceHUF: product.priceHUF,
+      stock: product.stock,
+      stripePriceId: product.stripePriceId || null,
+    };
     await prisma.product.upsert({
       where: { id: product.id },
-      create: { ...product },
+      create: { id: product.id, ...data },
       update: {
-        title: product.title,
-        priceHUF: product.priceHUF,
-        stripePriceId: product.stripePriceId,
+        title: data.title,
+        priceHUF: data.priceHUF,
+        stripePriceId: data.stripePriceId,
       },
     });
   }
