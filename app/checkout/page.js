@@ -517,7 +517,7 @@ export default function CheckoutPage() {
                     id="note"
                     className={styles.noteTextarea}
                     value={st.note}
-                    placeholder="Pl. kapucsengő, időablak…"
+                    placeholder="Ide írhatod, ha szeretnél a könyvbe személyre szóló dedikálást és jelezheted a csomaghoz tartozó bilincs színét, ha van benne vagy bármilyen egyéb kérést..."
                     onChange={(e) => dispatch(setField({ key: "note", value: e.target.value }))}
                   />
                 </div>
