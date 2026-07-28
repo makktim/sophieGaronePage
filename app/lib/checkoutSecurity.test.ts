@@ -41,9 +41,9 @@ test("computeOrderTotals uses server product prices only", () => {
   });
 
   assert.equal(totals.subtotalHUF, 5669 * 2 + 6299);
-  assert.equal(totals.shippingHUF, 990);
+  assert.equal(totals.shippingHUF, 1190);
   assert.equal(totals.discountHUF, 0);
-  assert.equal(totals.totalHUF, totals.subtotalHUF + 990);
+  assert.equal(totals.totalHUF, totals.subtotalHUF + 1190);
 });
 
 test("computeOrderTotals rejects insufficient stock", () => {
@@ -98,5 +98,25 @@ test("computeOrderTotals charges home delivery price for foxpost_courier", () =>
     products,
     shippingMethod: "foxpost_courier",
   });
-  assert.equal(totals.shippingHUF, 1390);
+  assert.equal(totals.shippingHUF, 2500);
+});
+
+test("computeOrderTotals makes home delivery free at 15000+ subtotal", () => {
+  const products = new Map([["p1", { priceHUF: 15000, stock: 5 }]]);
+  const totals = computeOrderTotals({
+    lines: [{ productId: "p1", quantity: 1 }],
+    products,
+    shippingMethod: "foxpost_courier",
+  });
+  assert.equal(totals.shippingHUF, 0);
+});
+
+test("computeOrderTotals keeps locker fee above free-home threshold", () => {
+  const products = new Map([["p1", { priceHUF: 15000, stock: 5 }]]);
+  const totals = computeOrderTotals({
+    lines: [{ productId: "p1", quantity: 1 }],
+    products,
+    shippingMethod: "foxpost_locker",
+  });
+  assert.equal(totals.shippingHUF, 1190);
 });

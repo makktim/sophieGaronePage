@@ -137,7 +137,9 @@ export default function ProductDetailView({
         </dl>
       )}
 
-      <div className={styles.descOneLine}>{product.tagline}</div>
+      {product.tagline ? (
+        <div className={styles.descOneLine}>{product.tagline}</div>
+      ) : null}
       <div
         className={
           variant === "modal" ? styles.modalDescription : styles.description
@@ -145,6 +147,15 @@ export default function ProductDetailView({
       >
         {product.longDescription}
       </div>
+      {product.contents ? (
+        <p
+          className={
+            variant === "modal" ? styles.modalContents : styles.contents
+          }
+        >
+          {product.contents}
+        </p>
+      ) : null}
 
       <div
         className={

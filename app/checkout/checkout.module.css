@@ -219,6 +219,13 @@
   white-space: nowrap;
 }
 
+.shipNote {
+  margin: 8px 0 0;
+  font-size: 13px;
+  line-height: 1.4;
+  opacity: 0.75;
+}
+
 /* Card brand icons */
 .cardIcons {
   margin-left: auto;

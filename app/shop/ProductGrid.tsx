@@ -36,7 +36,6 @@ export default function ProductGrid({
   const [products, setProducts] = useState<ShopProductDetail[]>(
     FALLBACK_SHOP_PRODUCTS
   );
-  const [loading, setLoading] = useState(true);
   const [quickViewProduct, setQuickViewProduct] =
     useState<ShopProductDetail | null>(null);
 
@@ -55,13 +54,10 @@ export default function ProductGrid({
               )
             )
           : [];
-        setProducts(apiProducts.length ? apiProducts : FALLBACK_SHOP_PRODUCTS);
+        if (apiProducts.length) setProducts(apiProducts);
       })
       .catch(() => {
-        if (mounted) setProducts(FALLBACK_SHOP_PRODUCTS);
-      })
-      .finally(() => {
-        if (mounted) setLoading(false);
+        // Keep fallback products already on screen.
       });
 
     return () => {
@@ -104,10 +100,7 @@ export default function ProductGrid({
         <h2 className={styles.sectionTitle}>{sectionTitle}</h2>
       )}
 
-      {loading ? (
-        <p className={styles.shopIntro}>Betöltés…</p>
-      ) : (
-        <section className={styles.productGrid} aria-label="Termékek">
+      <section className={styles.productGrid} aria-label="Termékek">
           {products.map((product) => {
             const badgeLabel = getProductBadgeLabel(product);
             return (
@@ -169,7 +162,6 @@ export default function ProductGrid({
             );
           })}
         </section>
-      )}
 
       <QuickViewModal
         product={quickViewProduct}

@@ -20,12 +20,13 @@ const PickupPointPicker = dynamic(
   { ssr: false }
 );
 
-/** TEMP: keep in sync with FREE_SHIPPING_FOR_TESTING in checkoutSecurity.ts */
-const FREE_SHIPPING_FOR_TESTING = true;
+const SHIPPING_PRICES = {
+  foxpost_courier: 2500,
+  foxpost_locker: 1190,
+  pickup: 0,
+};
 
-const SHIPPING_PRICES = FREE_SHIPPING_FOR_TESTING
-  ? { foxpost_courier: 0, foxpost_locker: 0, pickup: 0 }
-  : { foxpost_courier: 1390, foxpost_locker: 990, pickup: 0 };
+const FREE_HOME_SHIPPING_THRESHOLD_HUF = 15_000;
 
 function formatHUF(v) {
   const n = Number(v);
@@ -69,9 +70,23 @@ export default function CheckoutPage() {
   }, [dispatch, subtotal, items.length]);
 
   const shippingCost = useMemo(() => {
-    const price = SHIPPING_PRICES?.[st?.shipping];
+    const sub = Number.isFinite(Number(subtotal)) ? Number(subtotal) : 0;
+    const method = st?.shipping;
+    if (
+      (method === "foxpost_courier" || method === "foxpost_home") &&
+      sub >= FREE_HOME_SHIPPING_THRESHOLD_HUF
+    ) {
+      return 0;
+    }
+    const price = SHIPPING_PRICES?.[method];
     return Number.isFinite(price) ? price : 0;
-  }, [st?.shipping]);
+  }, [st?.shipping, subtotal]);
+
+  const homeShippingBadge = useMemo(() => {
+    const sub = Number.isFinite(Number(subtotal)) ? Number(subtotal) : 0;
+    if (sub >= FREE_HOME_SHIPPING_THRESHOLD_HUF) return "Ingyenes";
+    return formatHUF(SHIPPING_PRICES.foxpost_courier);
+  }, [subtotal]);
 
   const requiresPickup = st.shipping === "foxpost_locker";
 
@@ -314,7 +329,7 @@ export default function CheckoutPage() {
                     onChange={() => dispatch(setShippingMethod("foxpost_courier"))}
                   />
                   <span>Foxpost házhozszállítás (futár)</span>
-                  <em className={styles.badge}>{formatHUF(SHIPPING_PRICES.foxpost_courier)}</em>
+                  <em className={styles.badge}>{homeShippingBadge}</em>
                 </label>
                 <label className={styles.radio}>
                   <input
@@ -326,6 +341,10 @@ export default function CheckoutPage() {
                   <em className={styles.badge}>{formatHUF(SHIPPING_PRICES.foxpost_locker)}</em>
                 </label>
               </div>
+
+              <p className={styles.shipNote}>
+                15&nbsp;000&nbsp;Ft kosárérték felett a házhozszállítás ingyenes.
+              </p>
 
               <label className={styles.check}>
                 <input

@@ -53,15 +53,12 @@
 .transferBox {
   margin-top: 18px;
   padding: 16px;
-  border: 1px solid #bbf7d0;
-  border-radius: 12px;
-  background: #f0fdf4;
 }
 
 .transferTitle {
   margin: 0 0 12px;
   font-size: 16px;
-  color: #166534;
+  color: fff;
 }
 
 .row {

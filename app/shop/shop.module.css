@@ -461,7 +461,7 @@
 .modalImageWrap {
   position: relative;
   aspect-ratio: 2 / 3;
-  background: var(--shop-card-bg);
+  background: #000;
   border: 1px solid var(--shop-card-border);
   border-radius: 4px;
   overflow: hidden;
@@ -503,6 +503,21 @@
   line-height: 1.65;
   text-align: justify;
   color: #5a5a5a;
+}
+
+.modalContents {
+  margin: 0;
+  font-size: 0.92rem;
+  line-height: 1.65;
+  text-align: justify;
+  color: #5a5a5a;
+  white-space: pre-line;
+}
+
+.contents {
+  margin: 0;
+  line-height: 26px;
+  white-space: pre-line;
 }
 
 .modalPurchase {

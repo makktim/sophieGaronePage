@@ -6,6 +6,7 @@ import Footer from "./components/footer/footer";
 import { ReduxProvider } from "./store/provider";
 import { ToastProvider } from "./components/toast/ToastProvider";
 import CartPersistence from "./components/cartPersistence";
+import CookieConsent from "./components/cookieConsent/CookieConsent";
 
 export const metadata: Metadata = {
   metadataBase: new URL(
@@ -40,6 +41,7 @@ export default function RootLayout({
             <Header />
             {children}
             <Footer />
+            <CookieConsent />
           </ToastProvider>
         </ReduxProvider>
       </body>

@@ -7,15 +7,14 @@ const ALLOWED_SHIPPING_METHODS = new Set([
   "pickup",
 ]);
 
-/** TEMP: set false to restore shipping fees after testing. */
-const FREE_SHIPPING_FOR_TESTING = true;
+const FREE_HOME_SHIPPING_THRESHOLD_HUF = 15_000;
 
 const SHIPPING_PRICES_HUF: Record<string, number> = {
-  foxpost_locker: 990,
-  foxpost_courier: 1390,
-  foxpost_home: 1390,
-  gls_courier: 1390,
-  gls_parcelshop: 990,
+  foxpost_locker: 1190,
+  foxpost_courier: 2500,
+  foxpost_home: 2500,
+  gls_courier: 2500,
+  gls_parcelshop: 1190,
   pickup: 0,
 };
 
@@ -164,9 +163,17 @@ export function normalizeShippingMethod(value: unknown): string {
   return ALLOWED_SHIPPING_METHODS.has(method) ? method : "foxpost_locker";
 }
 
-export function computeShippingHUF(shippingMethod: string): number {
-  if (FREE_SHIPPING_FOR_TESTING) return 0;
+export function computeShippingHUF(
+  shippingMethod: string,
+  subtotalHUF = 0
+): number {
   const method = shippingMethod.toLowerCase();
+  if (
+    HOME_DELIVERY_METHODS.has(method) &&
+    subtotalHUF >= FREE_HOME_SHIPPING_THRESHOLD_HUF
+  ) {
+    return 0;
+  }
   if (HOME_DELIVERY_METHODS.has(method)) {
     return SHIPPING_PRICES_HUF.foxpost_home;
   }
@@ -223,7 +230,7 @@ export function computeOrderTotals(args: {
     subtotalHUF += Number(product.priceHUF) * line.quantity;
   }
 
-  const shippingHUF = computeShippingHUF(args.shippingMethod);
+  const shippingHUF = computeShippingHUF(args.shippingMethod, subtotalHUF);
   const discountHUF = 0;
   const totalHUF = Math.max(0, subtotalHUF + shippingHUF - discountHUF);
 

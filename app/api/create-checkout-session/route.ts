@@ -48,13 +48,10 @@ type BodyShape = {
   acceptTos?: boolean;
 };
 
+/** Short order ref: ORD-237705 (6 digits, ~900k space; DB @unique enforces uniqueness). */
 function genOrderNo(): string {
-  const d = new Date();
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
   const rnd = Math.floor(Math.random() * 900000 + 100000);
-  return `ORD-${y}${m}${day}-${rnd}`;
+  return `ORD-${rnd}`;
 }
 
 function isSandboxFoxpost(): boolean {
