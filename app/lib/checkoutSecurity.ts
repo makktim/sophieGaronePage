@@ -7,7 +7,7 @@ const ALLOWED_SHIPPING_METHODS = new Set([
   "pickup",
 ]);
 
-const FREE_HOME_SHIPPING_THRESHOLD_HUF = 15_000;
+const FREE_SHIPPING_THRESHOLD_HUF = 15_000;
 
 const SHIPPING_PRICES_HUF: Record<string, number> = {
   foxpost_locker: 1190,
@@ -168,10 +168,7 @@ export function computeShippingHUF(
   subtotalHUF = 0
 ): number {
   const method = shippingMethod.toLowerCase();
-  if (
-    HOME_DELIVERY_METHODS.has(method) &&
-    subtotalHUF >= FREE_HOME_SHIPPING_THRESHOLD_HUF
-  ) {
+  if (subtotalHUF >= FREE_SHIPPING_THRESHOLD_HUF) {
     return 0;
   }
   if (HOME_DELIVERY_METHODS.has(method)) {

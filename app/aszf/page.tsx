@@ -133,7 +133,7 @@ export default function Page() {
         <ul className={styles.listDisc}>
           <li>Foxpost csomagautomata: <strong>1 190 Ft</strong></li>
           <li>Foxpost házhozszállítás: <strong>2 500 Ft</strong></li>
-          <li><strong>15 000 Ft feletti</strong> rendelési érték esetén a házhozszállítás ingyenes.</li>
+          <li><strong>15 000 Ft feletti</strong> rendelési érték esetén a szállítás ingyenes.</li>
           <li>Szállítási idő: Általában a feladástól számított 2-5 munkanap, a Foxpost aktuális leterheltségének függvényében.</li>
           <li>Csomagponti átvételi határidő és sikertelen kézbesítés esetén a Foxpost hivatalos üzletszabályzata az irányadó.</li>
         </ul>

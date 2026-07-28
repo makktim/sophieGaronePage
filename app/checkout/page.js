@@ -26,7 +26,7 @@ const SHIPPING_PRICES = {
   pickup: 0,
 };
 
-const FREE_HOME_SHIPPING_THRESHOLD_HUF = 15_000;
+const FREE_SHIPPING_THRESHOLD_HUF = 15_000;
 
 function formatHUF(v) {
   const n = Number(v);
@@ -71,21 +71,18 @@ export default function CheckoutPage() {
 
   const shippingCost = useMemo(() => {
     const sub = Number.isFinite(Number(subtotal)) ? Number(subtotal) : 0;
-    const method = st?.shipping;
-    if (
-      (method === "foxpost_courier" || method === "foxpost_home") &&
-      sub >= FREE_HOME_SHIPPING_THRESHOLD_HUF
-    ) {
-      return 0;
-    }
-    const price = SHIPPING_PRICES?.[method];
+    if (sub >= FREE_SHIPPING_THRESHOLD_HUF) return 0;
+    const price = SHIPPING_PRICES?.[st?.shipping];
     return Number.isFinite(price) ? price : 0;
   }, [st?.shipping, subtotal]);
 
-  const homeShippingBadge = useMemo(() => {
+  const shippingBadge = useMemo(() => {
     const sub = Number.isFinite(Number(subtotal)) ? Number(subtotal) : 0;
-    if (sub >= FREE_HOME_SHIPPING_THRESHOLD_HUF) return "Ingyenes";
-    return formatHUF(SHIPPING_PRICES.foxpost_courier);
+    const free = sub >= FREE_SHIPPING_THRESHOLD_HUF;
+    return {
+      courier: free ? "Ingyenes" : formatHUF(SHIPPING_PRICES.foxpost_courier),
+      locker: free ? "Ingyenes" : formatHUF(SHIPPING_PRICES.foxpost_locker),
+    };
   }, [subtotal]);
 
   const requiresPickup = st.shipping === "foxpost_locker";
@@ -329,7 +326,7 @@ export default function CheckoutPage() {
                     onChange={() => dispatch(setShippingMethod("foxpost_courier"))}
                   />
                   <span>Foxpost házhozszállítás (futár)</span>
-                  <em className={styles.badge}>{homeShippingBadge}</em>
+                  <em className={styles.badge}>{shippingBadge.courier}</em>
                 </label>
                 <label className={styles.radio}>
                   <input
@@ -338,12 +335,12 @@ export default function CheckoutPage() {
                     onChange={() => dispatch(setShippingMethod("foxpost_locker"))}
                   />
                   <span>Foxpost automata</span>
-                  <em className={styles.badge}>{formatHUF(SHIPPING_PRICES.foxpost_locker)}</em>
+                  <em className={styles.badge}>{shippingBadge.locker}</em>
                 </label>
               </div>
 
               <p className={styles.shipNote}>
-                15&nbsp;000&nbsp;Ft kosárérték felett a házhozszállítás ingyenes.
+                15&nbsp;000&nbsp;Ft kosárérték felett a szállítás ingyenes.
               </p>
 
               <label className={styles.check}>
