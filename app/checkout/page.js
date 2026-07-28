@@ -20,11 +20,12 @@ const PickupPointPicker = dynamic(
   { ssr: false }
 );
 
-const SHIPPING_PRICES = {
-  foxpost_courier: 1390,
-  foxpost_locker: 990,
-  pickup: 0,
-};
+/** TEMP: keep in sync with FREE_SHIPPING_FOR_TESTING in checkoutSecurity.ts */
+const FREE_SHIPPING_FOR_TESTING = true;
+
+const SHIPPING_PRICES = FREE_SHIPPING_FOR_TESTING
+  ? { foxpost_courier: 0, foxpost_locker: 0, pickup: 0 }
+  : { foxpost_courier: 1390, foxpost_locker: 990, pickup: 0 };
 
 function formatHUF(v) {
   const n = Number(v);

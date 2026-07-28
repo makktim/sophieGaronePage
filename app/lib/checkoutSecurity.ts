@@ -7,6 +7,9 @@ const ALLOWED_SHIPPING_METHODS = new Set([
   "pickup",
 ]);
 
+/** TEMP: set false to restore shipping fees after testing. */
+const FREE_SHIPPING_FOR_TESTING = true;
+
 const SHIPPING_PRICES_HUF: Record<string, number> = {
   foxpost_locker: 990,
   foxpost_courier: 1390,
@@ -162,6 +165,7 @@ export function normalizeShippingMethod(value: unknown): string {
 }
 
 export function computeShippingHUF(shippingMethod: string): number {
+  if (FREE_SHIPPING_FOR_TESTING) return 0;
   const method = shippingMethod.toLowerCase();
   if (HOME_DELIVERY_METHODS.has(method)) {
     return SHIPPING_PRICES_HUF.foxpost_home;
