@@ -517,20 +517,10 @@ export default function CheckoutPage() {
                     id="note"
                     className={styles.noteTextarea}
                     value={st.note}
-                    placeholder="Ide írhatod, ha szeretnél a könyvbe személyre szóló dedikálást és jelezheted a csomaghoz tartozó bilincs színét, ha van benne vagy bármilyen egyéb kérést..."
+                    placeholder="Ide írhatod, ha szeretnél a könyvbe személyre szóló dedikálást és jelezheted a csomaghoz tartozó bilincs színét vagy bármilyen egyéb kérést..."
                     onChange={(e) => dispatch(setField({ key: "note", value: e.target.value }))}
                   />
                 </div>
-                <label className={styles.check}>
-                  <input
-                    type="checkbox" checked={st.marketing}
-                    onChange={(e) => dispatch(setField({ key: "marketing", value: e.target.checked }))}
-                  />
-                  <span>
-                    Hírlevelet szeretnék kapni{" "}
-                    <a href="/adatvedelem" target="_blank" rel="noopener">(Adatvédelmi nyilatkozat)</a>
-                  </span>
-                </label>
                 <label className={styles.check}>
                   <input
                     type="checkbox" checked={st.acceptTos}
