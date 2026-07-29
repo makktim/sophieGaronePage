@@ -147,10 +147,10 @@ export default function AboutPage() {
       <div className={styles.contact}>
         <h4 className={styles.paragraph}>
           Ha szeretnél értesülni a könyvmegjelenésekről és exkluzív
-          tartalmakról, iratkozz fel a hírlevélre!
+          tartalmainkról
         </h4>
         <h4 className={styles.paragraph}>
-          Kövess Instagramon és Facebookon, ahol betekintést nyerhetsz a
+          kövess minket és betekintést nyerhetsz a
           történet kulisszái mögé!
         </h4>
       </div>
