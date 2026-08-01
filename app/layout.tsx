@@ -12,10 +12,34 @@ export const metadata: Metadata = {
   metadataBase: new URL(
     process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"
   ),
-  title: "Sophie Garone Author page",
-  description: "Fantasy Romantic Author page",
+  title: "Sophie Garone",
+  description:
+    "Sophie Garone romantikus fantasy világ – könyvek, csomagok és hivatalos szerzői oldal.",
   icons: {
     icon: "/favicon.ico",
+  },
+  openGraph: {
+    type: "website",
+    locale: "hu_HU",
+    siteName: "Sophie Garone",
+    title: "Sophie Garone",
+    description:
+      "Sophie Garone romantikus fantasy világ – könyvek, csomagok és hivatalos szerzői oldal.",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "Sophie Garone – Ég és föld között & A felhők felett",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Sophie Garone",
+    description:
+      "Sophie Garone romantikus fantasy világ – könyvek, csomagok és hivatalos szerzői oldal.",
+    images: ["/og-image.png"],
   },
 };
 
