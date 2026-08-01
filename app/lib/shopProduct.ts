@@ -72,6 +72,7 @@ export const SHOP_PRODUCT_DISPLAY_ORDER: string[] = [
 export const HIDDEN_FROM_SHOP_PRODUCT_IDS = new Set<string>([
   "0e2f498c-25f3-4538-bb3c-f0cd6183277c", // A felhők felett (5669 Ft)
   "036e509c-9202-46ca-9e30-a0239324dfba", // Ég és föld között (5669 Ft)
+  "a1b2c3d4-e5f6-7890-ab12-000000000099", // Éles próba – teszt termék
 ]);
 
 export function isShopProductListed(id: string | undefined | null): boolean {
