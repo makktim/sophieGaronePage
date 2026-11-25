@@ -66,6 +66,13 @@ const PRODUCTS = [
     stock: 100,
     stripePriceId: "price_1Txw5YRVMPQ6s4fB9UT3292v",
   },
+  {
+    id: "a1b2c3d4-e5f6-7890-ab12-000000000008",
+    title: "Karácsonyi Duó Csomag",
+    priceHUF: 9999,
+    stock: 100,
+    stripePriceId: "price_1Ufhx8RVMPQ6s4fBqRIAyVlS",
+  },
 ] as const;
 
 async function main() {

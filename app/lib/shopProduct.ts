@@ -59,6 +59,7 @@ const PACKAGE_DELIVERY = "A megjelenés után 2–4 munkanap";
  * Ismeretlen ID-k a lista végére kerülnek.
  */
 export const SHOP_PRODUCT_DISPLAY_ORDER: string[] = [
+  "a1b2c3d4-e5f6-7890-ab12-000000000008", // Karácsonyi Duó Csomag (karácsonyi akció)
   "a1b2c3d4-e5f6-7890-ab12-000000000006", // Sophie Garone Duó – Prémium Olvasói Csomag
   "a1b2c3d4-e5f6-7890-ab12-000000000007", // Sophie Garone Teljes Duó – Érzéki Fantasy Csomag
   "a1b2c3d4-e5f6-7890-ab12-000000000004", // A felhők felett – Bűnös Szenvedély Csomag
@@ -121,6 +122,22 @@ export function getProductBadgeLabel(
 }
 
 const PRODUCT_OVERRIDES: Record<string, Partial<ShopProductDetail>> = {
+  "a1b2c3d4-e5f6-7890-ab12-000000000008": {
+    author: "Sophie Garone",
+    title: "Karácsonyi Duó Csomag",
+    description:
+      "Karácsonyi akció! Mindkét Sophie Garone regény egy csomagban, ajándék bilinccsel – tökéletes karácsonyi meglepetés a romantikus fantasy rajongóinak.",
+    longDescription:
+      "A Karácsonyi Duó Csomag Kyra és Matt teljes történetét tartalmazza: az Ég és föld között és A felhők felett regényeket. Mellé ajándékba jár egy bilincs, hogy a történet a lapokon túl is veled maradjon. Az akció a karácsonyi időszakban érvényes.",
+    contents:
+      "A csomag tartalma:\n• 1db Ég és föld között könyv\n• 1db A felhők felett könyv\n• 1db bilincs (ajándék)",
+    meta: PACKAGE_META,
+    deliveryNote: PACKAGE_DELIVERY,
+    onSale: true,
+    badgeLabel: "KARÁCSONYI AKCIÓ!",
+    imageSrc: "/assets/shop/karacsonyi_akcio.png",
+    price: 9999,
+  },
   "0e2f498c-25f3-4538-bb3c-f0cd6183277c": {
     author: "Sophie Garone",
     title: "A felhők felett",
@@ -281,6 +298,12 @@ export function mapApiProductToDetail(product: ApiProduct): ShopProductDetail {
 }
 
 const FALLBACK_API_PRODUCTS: ApiProduct[] = [
+  {
+    id: "a1b2c3d4-e5f6-7890-ab12-000000000008",
+    title: "Karácsonyi Duó Csomag",
+    priceHUF: 9999,
+    stock: 100,
+  },
   {
     id: "a1b2c3d4-e5f6-7890-ab12-000000000001",
     title: "Ég és föld között – Olvasói Élménycsomag",
