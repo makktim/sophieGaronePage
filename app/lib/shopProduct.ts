@@ -134,7 +134,7 @@ const PRODUCT_OVERRIDES: Record<string, Partial<ShopProductDetail>> = {
     meta: PACKAGE_META,
     deliveryNote: PACKAGE_DELIVERY,
     onSale: true,
-    badgeLabel: "KARÁCSONYI AKCIÓ!",
+    badgeLabel: "Karácsonyi akció",
     imageSrc: "/assets/shop/karacsonyi_akcio.png",
     price: 9999,
   },
