@@ -128,9 +128,9 @@ const PRODUCT_OVERRIDES: Record<string, Partial<ShopProductDetail>> = {
     description:
       "Karácsonyi akció! Mindkét Sophie Garone regény egy csomagban, ajándék bilinccsel – tökéletes karácsonyi meglepetés a romantikus fantasy rajongóinak.",
     longDescription:
-      "A Karácsonyi Duó Csomag Kyra és Matt teljes történetét tartalmazza: az Ég és föld között és A felhők felett regényeket. Mellé ajándékba jár egy bilincs, hogy a történet a lapokon túl is veled maradjon. Az akció a karácsonyi időszakban érvényes.",
+      "A Karácsonyi Duó Csomag Kyra és Matt teljes történetét tartalmazza: az Ég és föld között és A felhők felett regényeket. Mellé ajándékba jár egy bilincs – a színét (piros, fekete, rózsaszín vagy lila) a pénztárban, a megjegyzés mezőben adhatod meg. Az akció a karácsonyi időszakban érvényes.",
     contents:
-      "A csomag tartalma:\n• 1db Ég és föld között könyv\n• 1db A felhők felett könyv\n• 1db bilincs (ajándék)",
+      "A csomag tartalma:\n• 1db Ég és föld között könyv\n• 1db A felhők felett könyv\n• 1db bilincs ajándékba, választható színben (piros, fekete, rózsaszín, lila)",
     meta: PACKAGE_META,
     deliveryNote: PACKAGE_DELIVERY,
     onSale: true,
